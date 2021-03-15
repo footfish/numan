@@ -15,9 +15,6 @@
  */
 
 /*Package numan is a number management tool
-
 Quick Start
-
-
 */
 package numan

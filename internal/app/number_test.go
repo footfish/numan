@@ -68,7 +68,7 @@ func TestReserve(t *testing.T) {
 		}
 		//Reserve
 		untilTS := time.Now().Unix() + (60 * 15) //15mins
-		userID := 99
+		userID := int64(99)
 		if err := nu.Reserve(&validPhoneNumbers[0], &userID, &untilTS); err != nil {
 			t.Fatal(err)
 		}
@@ -81,6 +81,35 @@ func TestReserve(t *testing.T) {
 	})
 
 }
+
+func TestListUserId(t *testing.T) {
+	t.Run("OkListUserId", func(t *testing.T) {
+		nu := HelperNewNumberService(t)
+		defer nu.Close()
+		//Add
+		for i := 0; i < len(validPhoneNumbers); i++ {
+			if err := nu.Add(&numan.Number{E164: validPhoneNumbers[i], Domain: "anydomain.com", Carrier: "anycarrier"}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		//Reserve
+		untilTS := time.Now().Unix() + (60 * 15) //15mins
+		userID := int64(99)
+		for i := 0; i < 2; i++ {
+			if err := nu.Reserve(&validPhoneNumbers[i], &userID, &untilTS); err != nil {
+				t.Fatal(err)
+			}
+		}
+		//Read & check
+		if storedNumber, err := nu.ListUserID(userID); err != nil {
+			t.Fatal(err)
+		} else if want, got := 2, len(storedNumber); want != got { //Cc
+			t.Fatalf("ListUserId got %v, want %v", got, want)
+		}
+	})
+
+}
+
 func TestAdd(t *testing.T) {
 	//Verifiy basic Add
 	t.Run("OkAddDeletePhoneNumber", func(t *testing.T) {
@@ -102,7 +131,7 @@ func TestAdd(t *testing.T) {
 			t.Fatalf("got %v, want %v", got, want)
 		} else if want, got := "anycarrier", storedNumber[0].Carrier; want != got { //Carrier
 			t.Fatalf("got %v, want %v", got, want)
-		} else if want, got := 0, storedNumber[0].UserID; want != got { //UserID
+		} else if want, got := int64(0), storedNumber[0].UserID; want != got { //UserID
 			t.Fatalf("UserId got %v, want %v", got, want)
 		} else if want, got := false, storedNumber[0].Used; want != got { //Used
 			t.Fatalf("Used got %v, want %v", got, want)
@@ -161,7 +190,7 @@ func TestAdd(t *testing.T) {
 }
 
 // NewNumberService instantiates a new NuService.
-func HelperNewNumberService(t *testing.T) *NumberService {
+func HelperNewNumberService(t *testing.T) numan.API {
 	t.Helper()
-	return NewNumberService(":memory:")
+	return NewNumanService(":memory:")
 }

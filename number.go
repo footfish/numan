@@ -16,12 +16,12 @@ const (
 
 //Number represents a stored phone number entry
 type Number struct {
-	ID          int    // number entry index
+	ID          int64  // number entry index
 	E164        E164   //an e.164 number
 	Used        bool   // indicates number is actively being used or not (reserved, allocated).
 	Domain      string // which domain is using the number (which domain can allocate)
 	Carrier     string // who is the block owner
-	UserID      int    // which client a/c is using
+	UserID      int64  // which client a/c is using
 	Allocated   int64  // timestamp of when the number was allocated OR 0 if unused
 	Reserved    int64  // timestamp if the number is reserved OR 0
 	DeAllocated int64  // timestamp when number was last cancelled (use for quarantine) OR 0
@@ -38,12 +38,12 @@ type E164 struct {
 
 //NumberFilter represents a stored phone number lookup filter
 type NumberFilter struct {
-	ID          int    // number entry index (0 unused)
+	ID          int64  // number entry index (0 unused)
 	E164        E164   // an e.164 number
 	State       byte   // 0 - ignore, 1 - free, 2 - used
 	Domain      string // which domain is using the number (which domain can allocate)
 	Carrier     string // who is the block owner
-	UserID      int    // which client a/c is using
+	UserID      int64  // which client a/c is using
 	Allocated   bool   // if the number was ordered
 	Reserved    bool   // if the number is reserved
 	DeAllocated bool   // if number was last cancelled (use for quarantine)
@@ -60,14 +60,12 @@ type NumberAPI interface {
 	AddGroup()
 	//List returns a filtered list of numbers
 	List(filter *NumberFilter) ([]Number, error)
-	//ListFree returns a filtered list of numbers available to order
-	ListFree(filter *NumberFilter) ([]Number, error)
 	//ListUserID gets list of numbers attached to specific UserID
-	ListUserID(userID int) ([]Number, error)
+	ListUserID(userID int64) ([]Number, error)
 	//Reserve locks a number to a UserID until untilTS (unix timestamp)
-	Reserve(number *E164, userID *int, untilTS *int64) error
+	Reserve(number *E164, userID *int64, untilTS *int64) error
 	//Allocate marks a number 'used' by a User
-	Allocate(number *E164, userID *int) error
+	Allocate(number *E164, userID *int64) error
 	//DeAllocate number from User (number goes to quarantine)
 	DeAllocate(number *E164) error
 	//Portout sets a port out date (just a log, doesn't care about state or do anything else)
@@ -97,7 +95,7 @@ func (phoneNumber E164) ValidE164() error {
 }
 
 //ValidUserID validates userid format.
-func ValidUserID(userID *int) error {
+func ValidUserID(userID *int64) error {
 	if *userID == 0 {
 		return errors.New("User id invalid")
 	}

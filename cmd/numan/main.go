@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/footfish/numan"
+	"github.com/footfish/numan/api/grpc"
 	"github.com/footfish/numan/internal/app"
 	"github.com/footfish/numan/internal/cmdcli"
 	"github.com/gookit/color"
@@ -16,6 +17,7 @@ import (
 const (
 	//DSN is path to sqlite file
 	DSN = "./examples/numan-sqlite.db"
+	//address = "localhost:50051"
 )
 
 func main() {
@@ -86,9 +88,20 @@ func initCli() cmdcli.CommandConfigs {
 	return cli
 }
 
+//newNuman instantiates a numan.API using either gRPC OR local database connection.
+func newNuman() (nu numan.API) {
+	address := os.Getenv("RPC_ADDRESS")
+	if os.Getenv("RPC_ADDRESS") == "" {
+		//fmt.Println("local db connection")
+		return app.NewNumanService(DSN)
+	}
+	//fmt.Println("GRPC connection")
+	return grpc.NewNumanClientAdapter(address)
+}
+
 //add <phonenumber> <domain> <carrier>
 func add(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
@@ -109,7 +122,7 @@ func add(p cmdcli.RxParameters) {
 
 //list <phonenumber>
 func list(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 
 	var filter numan.NumberFilter
@@ -142,7 +155,7 @@ func list(p cmdcli.RxParameters) {
 
 //portout <phonenumber> <date>
 func portout(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
@@ -162,7 +175,7 @@ func portout(p cmdcli.RxParameters) {
 
 //portin <phonenumber> <date>
 func portin(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
@@ -182,10 +195,10 @@ func portin(p cmdcli.RxParameters) {
 
 //list_free <phonenumber>
 func listFree(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 
-	var filter numan.NumberFilter
+	filter := numan.NumberFilter{State: 1} //1 = free
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
 
 	if len(splitNumber) == 2 {
@@ -203,7 +216,7 @@ func listFree(p cmdcli.RxParameters) {
 		filter.Domain = domain
 	}
 
-	if numberList, err := nu.ListFree(&filter); err != nil {
+	if numberList, err := nu.List(&filter); err != nil {
 		color.Warn.Println(err)
 		os.Exit(1)
 	} else {
@@ -216,7 +229,7 @@ func listFree(p cmdcli.RxParameters) {
 
 //view <phonenumber>
 func view(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
@@ -235,7 +248,7 @@ func view(p cmdcli.RxParameters) {
 
 //summary
 func summary(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 	if summary, err := nu.Summary(); err != nil {
 		color.Warn.Println(err)
@@ -247,7 +260,7 @@ func summary(p cmdcli.RxParameters) {
 
 //delete <phonenumber>
 func delete(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
@@ -266,14 +279,14 @@ func delete(p cmdcli.RxParameters) {
 
 //reserve <phonenumber> <userid> <minutes>
 func reserve(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
 	number := numan.E164{
 		Cc:  splitNumber[0],
 		Ndc: splitNumber[1],
 		Sn:  splitNumber[2]}
-	userID := int(p["uid"].(int64))
+	userID := p["uid"].(int64)
 	untilTS := time.Now().Unix() + 60*p["minutes"].(int64)
 
 	if err := nu.Reserve(&number, &userID, &untilTS); err != nil {
@@ -292,14 +305,14 @@ func reserve(p cmdcli.RxParameters) {
 
 //allocate <phonenumber> <uid>
 func allocate(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
 	number := numan.E164{
 		Cc:  splitNumber[0],
 		Ndc: splitNumber[1],
 		Sn:  splitNumber[2]}
-	userID := int(p["uid"].(int64))
+	userID := p["uid"].(int64)
 
 	if err := nu.Allocate(&number, &userID); err != nil {
 		color.Warn.Println(err)
@@ -317,7 +330,7 @@ func allocate(p cmdcli.RxParameters) {
 
 //deallocate <phonenumber>
 func deallocate(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
 	number := numan.E164{
@@ -341,9 +354,9 @@ func deallocate(p cmdcli.RxParameters) {
 
 //	list_user <uid>
 func listUser(p cmdcli.RxParameters) {
-	nu := app.NewNumberService(DSN)
+	nu := newNuman()
 	defer nu.Close()
-	userID := int(p["uid"].(int64))
+	userID := p["uid"].(int64)
 
 	if numberList, err := nu.ListUserID(userID); err != nil {
 		color.Warn.Println(err)

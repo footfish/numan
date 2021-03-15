@@ -3,17 +3,18 @@ package storage
 import (
 	"database/sql"
 
+	"github.com/footfish/numan"
 	// register sqlite driver
 	_ "modernc.org/sqlite"
 )
 
-// Store implements db storage
-type Store struct {
+// store implements db storage
+type store struct {
 	db *sql.DB
 }
 
 // NewStore instantiates the storage
-func NewStore(dsn string) *Store {
+func NewStore(dsn string) numan.API {
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		panic(err)
@@ -39,10 +40,10 @@ func NewStore(dsn string) *Store {
 		`); err != nil {
 		panic(err)
 	}
-	return &Store{db: db}
+	return &store{db: db}
 }
 
 //Close closes db connection
-func (s *Store) Close() {
+func (s *store) Close() {
 	s.db.Close()
 }

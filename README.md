@@ -6,12 +6,12 @@ It's a learning project. The main purpose is to:
 - explore suitable Go project layout. 
 - explore using gRPC with REST endpoint. 
 
-The project loosely uses a domain driven design and [standard Go project layout](https://github.com/golang-standards/project-layout). The main business object being a 'number record'. 
+The project loosely uses a domain driven design and [standard Go project layout](https://github.com/golang-standards/project-layout). The main business objects being a 'number'(record) and a change 'history'. 
 The convention followed here is defining the business objects in root then layering the packages using interface (I guess you could call this Go's version of method overloading ). 
 
 To demonstrate using an example from the project folders. 
 
-- 'number' is the main business object 
+- 'number' is a business object 
 - /number.go <- this defines the business object API ie. interface and structs  
 - /internal/app/number.go <- this implements the number interface to the overall application 
 - /internal/storage/number.go <- this implements the number interface to storage (it's 'overloading'  ./app/number.go)
@@ -19,6 +19,11 @@ To demonstrate using an example from the project folders.
 This pattern allows for: 
 - Easily changing/adding new layers. For example swapping to a different storage mechanism. 
 - Avoids circular dependencies (which go does not allow). 
+
+## TODO
+- improve error handling 
+- expand tests 
+
 
 ## Installation
 This installation uses go modules so does not need to be in your $GOPATH (of course you will need go installed to compile)
@@ -31,11 +36,16 @@ $ go install ./cmd/...
 ```
 ## Running 
 
-### Client 
-`$ $GOPATH/bin/numan`
-
 ### Server 
-TODO 
+
+`$ $GOPATH/bin/numand &      #start server`
+
+### Client 
+
+`$ export RPC_ADDRESS=localhost:50051 #set RPC address to use gRPC` 
+
+`$ $GOPATH/bin/numan          #run cli`
+
 
 ## General Application Requirments 
 - able to reserve/hold numbers (time)
@@ -90,6 +100,7 @@ would require prevention of 'mass booking', perhaps client lock.
 ## Useful References
 
 https://grpc.io/docs/languages/go/
+https://developers.google.com/protocol-buffers
 https://github.com/golang-standards/project-layout
 https://github.com/neocortical/mysvc
 https://github.com/benbjohnson/wtf/tree/daadc79f3778fd49db6e4064878030487e2e2a47

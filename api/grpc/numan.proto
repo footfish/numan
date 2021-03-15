@@ -1,0 +1,154 @@
+syntax = "proto3";
+package grpc;
+
+option go_package = "https://github.com/footfish/numan/api/grpc";
+
+service Numan {
+    //Adds a new unused number to database.
+    rpc Add (AddRequest) returns (AddResponse) {}
+    //Not implemented 
+    rpc AddGroup(AddGroupRequest) returns (AddGroupResponse) {}
+    //List returns a filtered list of numbers
+    rpc List(ListRequest) returns (ListResponse) {}
+    //ListUserID gets list of numbers attached to specific UserID
+    rpc ListUserID(ListUserIDRequest) returns (ListUserIDResponse) {}
+    //Reserve locks a number to a UserID until untilTS (unix timestamp)
+    rpc Reserve(ReserveRequest) returns (ReserveResponse) {}
+    //Allocate marks a number 'used' by a 
+    rpc Allocate(AllocateRequest) returns (AllocateResponse) {}
+    //DeAllocate number from User (number goes to quarantine)
+    rpc DeAllocate(DeAllocateRequest) returns (DeAllocateResponse) {}
+    //Portout sets a port out date (just a log, doesn't care about state or do anything else)
+    rpc Portout(PortoutRequest) returns (PortoutResponse) {}
+    //Portin sets a port in date (just a log, doesn't care about state or do anything else)
+    rpc Portin(PortinRequest) returns (PortinResponse) {}
+    //Delete - number no longer used, removed from number db, must be unused (history kept).
+    rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+    //View formatted table of details for a specific number (with history).
+    rpc View(ViewRequest) returns (ViewResponse) {}
+    //Summary formatted table of usage stats
+    rpc Summary (SummaryRequest) returns (SummaryResponse) {}
+  }
+
+
+message AddRequest {
+   Number number = 1;
+  }
+
+ message AddResponse {
+  }
+
+  message AddGroupRequest {}
+  message AddGroupResponse {}
+
+  message ListRequest {
+     NumberFilter numberFilter = 1;
+  }
+
+  message ListResponse {
+    repeated Number number = 1;
+  }
+
+  message ListUserIDRequest {
+     int64 userID = 1;
+  }
+
+  message ListUserIDResponse {
+    repeated Number number = 1;
+  }
+
+  message ReserveRequest {
+     E164 e164 = 1;
+     int64 userID = 2;
+     int64 untilTS = 3;
+  }
+
+  message ReserveResponse {
+  }
+
+  message AllocateRequest {
+     E164 e164 = 1;
+     int64 userID = 2;
+  }
+
+  message AllocateResponse {
+  }
+
+  message DeAllocateRequest {
+     E164 e164 = 1;
+  }
+
+  message DeAllocateResponse {
+  }
+
+  message PortoutRequest {
+     E164 e164 = 1;
+     int64 PortoutTS = 2;
+  }
+
+  message PortoutResponse {
+  }
+
+  message PortinRequest {
+     E164 e164 = 1;
+     int64 PortinTS = 2;
+  }
+
+  message PortinResponse {
+  }
+
+  message DeleteRequest {
+     E164 e164 = 1;
+  }
+
+  message DeleteResponse {
+  }
+
+  message ViewRequest {
+     E164 e164 = 1;
+  }
+
+  message ViewResponse {
+    string message = 1;
+  }
+
+  message SummaryRequest {
+  }
+
+  message SummaryResponse {
+    string message = 1;
+  }
+
+  message E164 {
+    string cc = 1;
+    string ndc = 2; 
+    string sn = 3;
+  }
+
+  message Number {
+    int64 id = 1;
+     E164  e164 = 2;
+    bool used = 3;
+    string domain = 4;
+    string carrier = 5;
+    int64 userID = 6;
+    int64 allocated = 7;
+    int64 reserved = 8;  
+    int64 deAllocated = 9;
+    int64 portedIn = 10;    
+    int64 portedOut = 11;
+  }
+
+  message NumberFilter {
+    int64 id = 1;
+    E164  e164 = 2;
+    int32 state = 3;
+    string domain = 4;
+    string carrier = 5;
+    int64 userID = 6;
+    bool allocated = 7;
+    bool reserved = 8;  
+    bool deAllocated = 9;
+    bool portedIn = 10;    
+    bool portedOut = 11;
+  }
