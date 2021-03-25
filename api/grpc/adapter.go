@@ -7,6 +7,7 @@ import (
 	"github.com/footfish/numan"
 	"github.com/footfish/numan/internal/app"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 //numanClientAdapter server is used to implement Adapter from Numan to NumanClient.
@@ -16,9 +17,10 @@ type numanClientAdapter struct {
 }
 
 // NewNumanClientAdapter instantiates NumanClientAdaptor
-func NewNumanClientAdapter(address string) numan.API {
+func NewNumanClientAdapter(address string, creds credentials.TransportCredentials) numan.API {
 	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	//conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		panic(err)
 	}
@@ -149,8 +151,8 @@ type numanServerAdapter struct {
 }
 
 // NewGrpcServer creates a new grpc.Server and NumanServerAdapter
-func NewGrpcServer(dsn string) (*grpc.Server, NumanServer) {
-	return grpc.NewServer(), &numanServerAdapter{nu: app.NewNumanService(dsn)}
+func NewGrpcServer(dsn string, creds credentials.TransportCredentials) (*grpc.Server, NumanServer) {
+	return grpc.NewServer(grpc.Creds(creds)), &numanServerAdapter{nu: app.NewNumanService(dsn)}
 }
 
 //CloseServerAdapter shuts db connection

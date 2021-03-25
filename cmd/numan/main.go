@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -12,12 +13,14 @@ import (
 	"github.com/footfish/numan/internal/app"
 	"github.com/footfish/numan/internal/cmdcli"
 	"github.com/gookit/color"
+	"google.golang.org/grpc/credentials"
 )
 
 const (
 	//DSN is path to sqlite file
 	DSN = "./examples/numan-sqlite.db"
 	//address = "localhost:50051"
+	certFile = "./examples/server-cert.pem"
 )
 
 func main() {
@@ -96,7 +99,11 @@ func newNuman() (nu numan.API) {
 		return app.NewNumanService(DSN)
 	}
 	//fmt.Println("GRPC connection")
-	return grpc.NewNumanClientAdapter(address)
+	creds, err := credentials.NewClientTLSFromFile(certFile, "")
+	if err != nil {
+		log.Fatalf("cert load error: %s", err)
+	}
+	return grpc.NewNumanClientAdapter(address, creds)
 }
 
 //add <phonenumber> <domain> <carrier>
