@@ -50,8 +50,10 @@ func (n *numanClientAdapter) List(filter *numan.NumberFilter) (numbers []numan.N
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	numberList, err := n.nc.List(ctx, &ListRequest{NumberFilter: marshalNumberFilter(filter)})
-	for _, number := range numberList.Number {
-		numbers = append(numbers, *unMarshalNumber(number))
+	if err == nil {
+		for _, number := range numberList.Number {
+			numbers = append(numbers, *unMarshalNumber(number))
+		}
 	}
 	return
 }
@@ -61,10 +63,11 @@ func (n *numanClientAdapter) ListUserID(userID int64) (numbers []numan.Number, e
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	numberList, err := n.nc.ListUserID(ctx, &ListUserIDRequest{UserID: userID})
-	for _, number := range numberList.Number {
-		numbers = append(numbers, *unMarshalNumber(number))
+	if err == nil {
+		for _, number := range numberList.Number {
+			numbers = append(numbers, *unMarshalNumber(number))
+		}
 	}
-
 	return
 }
 
@@ -121,6 +124,9 @@ func (n *numanClientAdapter) View(number *numan.E164) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	resp, err := n.nc.View(ctx, &ViewRequest{E164: marshalE164(number)})
+	if err != nil {
+		return err.Error(), err
+	}
 	return resp.Message, err
 }
 
@@ -129,6 +135,9 @@ func (n *numanClientAdapter) Summary() (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	resp, err := n.nc.Summary(ctx, &SummaryRequest{})
+	if err != nil {
+		return err.Error(), err
+	}
 	return resp.Message, err
 
 }

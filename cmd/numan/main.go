@@ -66,12 +66,12 @@ func initCli() cmdcli.CommandConfigs {
 	cmd.NewIntParameter("uid", true)
 	cmd.NewIntParameter("minutes", true).SetRegexp("^[0-9]{1,2}$")
 
-	cmdDescription = "Sets a porting out date"
+	cmdDescription = "Sets a porting out date (dd/mm/yy)"
 	cmd = cli.NewCommand("portout", portout, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 	cmd.NewDateParameter("date", true)
 
-	cmdDescription = "Sets a porting in date"
+	cmdDescription = "Sets a porting in date (dd/mm/yy)"
 	cmd = cli.NewCommand("portin", portin, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 	cmd.NewDateParameter("date", true)
