@@ -2,8 +2,8 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -99,10 +99,12 @@ func newNuman() (nu numan.API) {
 		return app.NewNumanService(DSN)
 	}
 	//fmt.Println("GRPC connection")
-	creds, err := credentials.NewClientTLSFromFile(certFile, "")
+	/*creds, err := credentials.NewClientTLSFromFile(certFile, "")
 	if err != nil {
 		log.Fatalf("cert load error: %s", err)
-	}
+	} */
+
+	creds := credentials.NewTLS(&tls.Config{})
 	return grpc.NewNumanClientAdapter(address, creds)
 }
 

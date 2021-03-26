@@ -38,6 +38,8 @@ $ go install ./cmd/...
 
 ### Server 
 
+Install certs - see [/scripts/gen_certs.sh](./scripts/gen_certs.sh)
+
 `$ $GOPATH/bin/numand &      #start server`
 
 ### Client 

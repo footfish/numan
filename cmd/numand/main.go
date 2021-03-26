@@ -12,8 +12,8 @@ import (
 const (
 	//dsn is path to sqlite db file
 	dsn      = "./examples/numan-sqlite.db"
-	certFile = "./examples/server-cert.pem"
-	keyFile  = "./examples/server-key.pem"
+	certFile = "./examples/cert.pem"
+	keyFile  = "./examples/key.pem"
 	port     = ":50051"
 )
 
