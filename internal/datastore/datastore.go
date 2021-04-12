@@ -1,20 +1,19 @@
-package storage
+package datastore
 
 import (
 	"database/sql"
 
-	"github.com/footfish/numan"
 	// register sqlite driver
 	_ "modernc.org/sqlite"
 )
 
 // store implements db storage
-type store struct {
+type Store struct {
 	db *sql.DB
 }
 
 // NewStore instantiates the storage
-func NewStore(dsn string) numan.API {
+func NewStore(dsn string) *Store {
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		panic(err)
@@ -40,10 +39,22 @@ func NewStore(dsn string) numan.API {
 		`); err != nil {
 		panic(err)
 	}
-	return &store{db: db}
+	// Create the table if it does not exist
+	if _, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS user (
+			id INTEGER PRIMARY KEY,
+			username TEXT NOT NULL,
+			passwordhash TEXT NOT NULL,
+			role TEXT NOT NULL
+		);
+		`); err != nil {
+		panic(err)
+	}
+
+	return &Store{db: db}
 }
 
 //Close closes db connection
-func (s *store) Close() {
+func (s *Store) Close() {
 	s.db.Close()
 }

@@ -1,6 +1,7 @@
-package storage
+package datastore
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -12,9 +13,21 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// Add implements NumberAPI.Add()
-func (s *store) Add(number *numan.Number) error {
-	_, err := s.db.Exec("INSERT INTO number(cc, ndc, sn, domain, carrier) values(?,?,?,?,?)", number.E164.Cc, number.E164.Ndc, number.E164.Sn, number.Domain, number.Carrier)
+// numberingService implements the NumberingService interface
+type numberingService struct {
+	store Store
+}
+
+// NewNumberingService instantiates a NumberingService .
+func NewNumberingService(store *Store) numan.NumberingService {
+	return &numberingService{
+		store: *store,
+	}
+}
+
+// Add implements NumberingService.Add()
+func (s *numberingService) Add(ctx context.Context, number *numan.Numbering) error {
+	_, err := s.store.db.Exec("INSERT INTO number(cc, ndc, sn, domain, carrier) values(?,?,?,?,?)", number.E164.Cc, number.E164.Ndc, number.E164.Sn, number.Domain, number.Carrier)
 	if err != nil {
 		return err
 	}
@@ -22,11 +35,11 @@ func (s *store) Add(number *numan.Number) error {
 }
 
 // AddGroup not implemented
-func (s *store) AddGroup() {
+func (s *numberingService) AddGroup(ctx context.Context) {
 }
 
-//List implements NumberAPI.List()
-func (s *store) List(filter *numan.NumberFilter) ([]numan.Number, error) {
+//List implements NumberingService.List()
+func (s *numberingService) List(ctx context.Context, filter *numan.NumberFilter) ([]numan.Numbering, error) {
 	//build WHERE args from filter
 	where, args := []string{"1 = 1"}, []interface{}{}
 	if v := filter.E164.Cc; len(v) != 0 {
@@ -51,10 +64,10 @@ func (s *store) List(filter *numan.NumberFilter) ([]numan.Number, error) {
 		where, args = append(where, "domain = ?"), append(args, v)
 	}
 
-	var result numan.Number
-	var resultList []numan.Number
+	var result numan.Numbering
+	var resultList []numan.Numbering
 
-	rows, err := s.db.Query("SELECT * FROM number where "+strings.Join(where, " AND "), args...)
+	rows, err := s.store.db.Query("SELECT * FROM number where "+strings.Join(where, " AND "), args...)
 	if err != nil {
 		return resultList, err
 	}
@@ -88,16 +101,16 @@ func (s *store) List(filter *numan.NumberFilter) ([]numan.Number, error) {
 	return resultList, nil
 }
 
-//ListUserID implements NumberAPI.ListUserID()
-func (s *store) ListUserID(uid int64) ([]numan.Number, error) {
+//ListUserID implements NumberingService.ListUserID()
+func (s *numberingService) ListUserID(ctx context.Context, uid int64) ([]numan.Numbering, error) {
 	filter := &numan.NumberFilter{UserID: uid}
-	return s.List(filter)
+	return s.List(ctx, filter)
 }
 
-//Summary implements NumberAPI.Summary()
-func (s *store) Summary() (string, error) {
+//Summary implements NumberingService.Summary()
+func (s *numberingService) Summary(ctx context.Context) (string, error) {
 	summary := fmt.Sprintf("%-15v %5v %5v %5v %5v %5v\n", "Domain", "CC", "NDC", "Used", "Free", "Total")
-	rows, err := s.db.Query("SELECT domain, cc, ndc, sum(used) as used, count(*)-sum(used) as free,  count(*) as total from number group by domain,cc,ndc; ")
+	rows, err := s.store.db.Query("SELECT domain, cc, ndc, sum(used) as used, count(*)-sum(used) as free,  count(*) as total from number group by domain,cc,ndc; ")
 	if err != nil {
 		return summary, err
 	}
@@ -130,9 +143,9 @@ func (s *store) Summary() (string, error) {
 	return summary, nil
 }
 
-//Delete implements NumberAPI.Delete()
-func (s *store) Delete(phonenumber *numan.E164) error {
-	row, err := s.db.Exec("DELETE from number where used == 0 and cc=? and ndc=? and sn=?", phonenumber.Cc, phonenumber.Ndc, phonenumber.Sn)
+//Delete implements NumberingService.Delete()
+func (s *numberingService) Delete(ctx context.Context, phonenumber *numan.E164) error {
+	row, err := s.store.db.Exec("DELETE from number where used == 0 and cc=? and ndc=? and sn=?", phonenumber.Cc, phonenumber.Ndc, phonenumber.Sn)
 	if err != nil {
 		return err
 	}
@@ -143,9 +156,9 @@ func (s *store) Delete(phonenumber *numan.E164) error {
 	return nil
 }
 
-//View implements NumberAPI.View()
-func (s *store) View(number *numan.E164) (view string, err error) {
-	result, err := s.List(&numan.NumberFilter{E164: *number})
+//View implements NumberingService.View()
+func (s *numberingService) View(ctx context.Context, number *numan.E164) (view string, err error) {
+	result, err := s.List(ctx, &numan.NumberFilter{E164: *number})
 	if err != nil {
 		return "", err
 	}
@@ -176,11 +189,11 @@ func (s *store) View(number *numan.E164) (view string, err error) {
 	return view, nil
 }
 
-//Reserve implements NumberAPI.Reserve()
+//Reserve implements NumberingService.Reserve()
 //Mark 'used' & set userID & reserved date.
 //Numbers must be out of quarantine
-func (s *store) Reserve(number *numan.E164, userID *int64, untilTS *int64) error {
-	row, err := s.db.Exec("UPDATE number set used=1, deallocated=0, reserved=?, userID=? where reserved==0 and used==0 and userID==0 and cc=? and ndc=? and sn=? and deallocated<?", *untilTS, *userID, number.Cc, number.Ndc, number.Sn, time.Now().Unix()-numan.QUARANTINE)
+func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, userID *int64, untilTS *int64) error {
+	row, err := s.store.db.Exec("UPDATE number set used=1, deallocated=0, reserved=?, userID=? where reserved==0 and used==0 and userID==0 and cc=? and ndc=? and sn=? and deallocated<?", *untilTS, *userID, number.Cc, number.Ndc, number.Sn, time.Now().Unix()-numan.QUARANTINE)
 	if err != nil {
 		return err
 	}
@@ -191,11 +204,11 @@ func (s *store) Reserve(number *numan.E164, userID *int64, untilTS *int64) error
 	return nil
 }
 
-//Allocate implements NumberAPI.Allocate()
+//Allocate implements NumberingService.Allocate()
 //Mark 'used' & set userID & allocation date. Reset reservation & de-allocation flag
 //Numbers must be out of quarantine
-func (s *store) Allocate(number *numan.E164, userID *int64) error {
-	row, err := s.db.Exec("UPDATE number set used=1, deallocated=0, reserved=0, allocated=?, userID=? where used==0 and userID==0 and cc=? and ndc=? and sn=? and deallocated<?", time.Now().Unix(), *userID, number.Cc, number.Ndc, number.Sn, time.Now().Unix()-numan.QUARANTINE)
+func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, userID *int64) error {
+	row, err := s.store.db.Exec("UPDATE number set used=1, deallocated=0, reserved=0, allocated=?, userID=? where used==0 and userID==0 and cc=? and ndc=? and sn=? and deallocated<?", time.Now().Unix(), *userID, number.Cc, number.Ndc, number.Sn, time.Now().Unix()-numan.QUARANTINE)
 	if err != nil {
 		return err
 	}
@@ -206,10 +219,10 @@ func (s *store) Allocate(number *numan.E164, userID *int64) error {
 	return nil
 }
 
-//DeAllocate implements NumberAPI.DeAllocate()
+//DeAllocate implements NumberingService.DeAllocate()
 //Mark 'unused' & set de-allocation date (quarantine). Resets  userID, reservation & allocation dateflag.
-func (s *store) DeAllocate(number *numan.E164) error {
-	row, err := s.db.Exec("UPDATE number set used=0, deallocated=?, reserved=0, allocated=0, userID=0 where used==1 and cc=? and ndc=? and sn=? and deallocated=0", time.Now().Unix(), number.Cc, number.Ndc, number.Sn)
+func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164) error {
+	row, err := s.store.db.Exec("UPDATE number set used=0, deallocated=?, reserved=0, allocated=0, userID=0 where used==1 and cc=? and ndc=? and sn=? and deallocated=0", time.Now().Unix(), number.Cc, number.Ndc, number.Sn)
 	if err != nil {
 		return err
 	}
@@ -220,9 +233,9 @@ func (s *store) DeAllocate(number *numan.E164) error {
 	return nil
 }
 
-//Portout implements NumberAPI.Portout()
-func (s *store) Portout(number *numan.E164, PortoutTS *int64) error {
-	row, err := s.db.Exec("UPDATE number set portedOut=? where  cc=? and ndc=? and sn=?", *PortoutTS, number.Cc, number.Ndc, number.Sn)
+//Portout implements NumberingService.Portout()
+func (s *numberingService) Portout(ctx context.Context, number *numan.E164, PortoutTS *int64) error {
+	row, err := s.store.db.Exec("UPDATE number set portedOut=? where  cc=? and ndc=? and sn=?", *PortoutTS, number.Cc, number.Ndc, number.Sn)
 	if err != nil {
 		return err
 	}
@@ -233,9 +246,9 @@ func (s *store) Portout(number *numan.E164, PortoutTS *int64) error {
 	return nil
 }
 
-//Portin implements NumberAPI.Portin()
-func (s *store) Portin(number *numan.E164, PortinTS *int64) error {
-	row, err := s.db.Exec("UPDATE number set portedIn=? where  cc=? and ndc=? and sn=?", *PortinTS, number.Cc, number.Ndc, number.Sn)
+//Portin implements NumberingService.Portin()
+func (s *numberingService) Portin(ctx context.Context, number *numan.E164, PortinTS *int64) error {
+	row, err := s.store.db.Exec("UPDATE number set portedIn=? where  cc=? and ndc=? and sn=?", *PortinTS, number.Cc, number.Ndc, number.Sn)
 	if err != nil {
 		return err
 	}

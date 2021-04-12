@@ -1,0 +1,24 @@
+syntax = "proto3";
+package grpc;
+
+option go_package = "https://github.com/footfish/numan/api/grpc";
+
+service User {
+    //Auth authenticates a user/pass and returns a token.
+    rpc Auth (AuthRequest) returns (AuthResponse) {}
+}
+
+message AuthRequest {
+    string username = 1;
+    string password = 2;
+   }
+ 
+  message AuthResponse {
+    int64 uid = 1;
+    string username = 2;
+    string passwordhash = 3; 
+    string role = 4;
+    string token = 5;
+   }
+ 
+ 

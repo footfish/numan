@@ -1,21 +1,20 @@
-package app
+package datastore
 
 import (
 	"context"
 
 	"github.com/footfish/numan"
-	"github.com/footfish/numan/internal/datastore"
 )
 
 // historyService implements the HistoryService interface
 type historyService struct {
-	next numan.HistoryService
+	store Store
 }
 
 // NewHistoryService instantiates a new HistoryService.
-func NewHistoryService(store *datastore.Store) numan.HistoryService {
+func NewHistoryService(store *Store) numan.HistoryService {
 	return &historyService{
-		next: datastore.NewHistoryService(store),
+		store: *store,
 	}
 }
 

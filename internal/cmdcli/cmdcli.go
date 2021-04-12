@@ -66,6 +66,8 @@ type CommandConfig struct {
 	handler func(RxParameters) //function which implements command. Passed a map of typed & parsed parameters.
 }
 
+type HandlerFunc func(RxParameters)
+
 //NewCli makes the command configurations (1st function to call)
 func NewCli() CommandConfigs {
 	cli := make(CommandConfigs)
@@ -99,7 +101,7 @@ func (c CommandConfigs) Run() {
 }
 
 //NewCommand adds a new cli command.
-func (c CommandConfigs) NewCommand(newCommand string, handlerFunc func(RxParameters), help string) CommandConfig {
+func (c CommandConfigs) NewCommand(newCommand string, handlerFunc HandlerFunc, help string) CommandConfig {
 	//validate param format
 	if ok, err := regexp.MatchString(regexpCommand, newCommand); err != nil || !ok {
 		panic(errors.New("Command " + newCommand + " not allowed. Regexp '" + regexpCommand + "'"))

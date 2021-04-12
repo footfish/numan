@@ -1,23 +1,18 @@
 package app
 
-import (
-	"github.com/footfish/numan"
-	"github.com/footfish/numan/internal/storage"
-)
-
-// numanService implements the numanAPI
-type numanService struct {
-	db numan.API
+/*
+// app implements the API's
+type app struct {
+	store   storage.Store
+	number  numan.NumberAPI
+	history numan.HistoryAPI
+	user    numan.UserAPI
 }
 
-// NewNumanService instantiates a new NumberService.
-func NewNumanService(dsn string) numan.API {
-	return &numanService{
-		db: storage.NewStore(dsn),
+// NewApp instantiates a new app
+func NewApp(store storage.Store) *app {
+	return &app{
+		store: storage.NewStore(),
 	}
 }
-
-//Close closes db connection
-func (s *numanService) Close() {
-	s.db.Close()
-}
+*/

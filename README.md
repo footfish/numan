@@ -11,10 +11,10 @@ The convention followed here is defining the business objects in root then layer
 
 To demonstrate using an example from the project folders. 
 
-- 'number' is a business object 
-- /number.go <- this defines the business object API ie. interface and structs  
-- /internal/app/number.go <- this implements the number interface to the overall application 
-- /internal/storage/number.go <- this implements the number interface to storage (it's 'overloading'  ./app/number.go)
+- 'numbering' is a business object 
+- /numbering.go <- this defines the business object API ie. interface and structs  
+- /internal/app/numbering.go <- this implements the number interface to the overall application 
+- /internal/datastore/numbering.go <- this implements the number interface to storage 
 
 This pattern allows for: 
 - Easily changing/adding new layers. For example swapping to a different storage mechanism. 
@@ -23,6 +23,15 @@ This pattern allows for:
 ## TODO
 - improve error handling 
 - expand tests 
+- client config file 
+- server config
+- setup command user roles 
+- number history 
+- memory store for user auth
+- sanity check/verification of user/pass 
+- add/remove call for users 
+- add/remove users command 
+
 
 
 ## Installation
@@ -50,6 +59,7 @@ Install certs - see [/scripts/gen_certs.sh](./scripts/gen_certs.sh)
 
 
 ## General Application Requirments 
+- role based authentication
 - able to reserve/hold numbers (time)
 - limit numbers to a particular url domain
 - select a list of random available numbers 
@@ -74,7 +84,7 @@ Install certs - see [/scripts/gen_certs.sh](./scripts/gen_certs.sh)
     /internal 
         /app #core application 
         /cmdcli     # simple cli helper lib 
-        /storage    # db storage (sqlite in this case)
+        /datastore    # db storage (sqlite in this case)
     /scripts        # external scripts 
 
 #Not implemented but may be added 

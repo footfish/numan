@@ -14,10 +14,10 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// NumanClient is the client API for Numan service.
+// NumberingClient is the client API for Numbering service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type NumanClient interface {
+type NumberingClient interface {
 	//Adds a new unused number to database.
 	Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddResponse, error)
 	//Not implemented
@@ -44,126 +44,126 @@ type NumanClient interface {
 	Summary(ctx context.Context, in *SummaryRequest, opts ...grpc.CallOption) (*SummaryResponse, error)
 }
 
-type numanClient struct {
+type numberingClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewNumanClient(cc grpc.ClientConnInterface) NumanClient {
-	return &numanClient{cc}
+func NewNumberingClient(cc grpc.ClientConnInterface) NumberingClient {
+	return &numberingClient{cc}
 }
 
-func (c *numanClient) Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddResponse, error) {
+func (c *numberingClient) Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddResponse, error) {
 	out := new(AddResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/Add", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/Add", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) AddGroup(ctx context.Context, in *AddGroupRequest, opts ...grpc.CallOption) (*AddGroupResponse, error) {
+func (c *numberingClient) AddGroup(ctx context.Context, in *AddGroupRequest, opts ...grpc.CallOption) (*AddGroupResponse, error) {
 	out := new(AddGroupResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/AddGroup", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/AddGroup", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
+func (c *numberingClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
 	out := new(ListResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/List", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) ListUserID(ctx context.Context, in *ListUserIDRequest, opts ...grpc.CallOption) (*ListUserIDResponse, error) {
+func (c *numberingClient) ListUserID(ctx context.Context, in *ListUserIDRequest, opts ...grpc.CallOption) (*ListUserIDResponse, error) {
 	out := new(ListUserIDResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/ListUserID", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/ListUserID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) Reserve(ctx context.Context, in *ReserveRequest, opts ...grpc.CallOption) (*ReserveResponse, error) {
+func (c *numberingClient) Reserve(ctx context.Context, in *ReserveRequest, opts ...grpc.CallOption) (*ReserveResponse, error) {
 	out := new(ReserveResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/Reserve", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/Reserve", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) Allocate(ctx context.Context, in *AllocateRequest, opts ...grpc.CallOption) (*AllocateResponse, error) {
+func (c *numberingClient) Allocate(ctx context.Context, in *AllocateRequest, opts ...grpc.CallOption) (*AllocateResponse, error) {
 	out := new(AllocateResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/Allocate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/Allocate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) DeAllocate(ctx context.Context, in *DeAllocateRequest, opts ...grpc.CallOption) (*DeAllocateResponse, error) {
+func (c *numberingClient) DeAllocate(ctx context.Context, in *DeAllocateRequest, opts ...grpc.CallOption) (*DeAllocateResponse, error) {
 	out := new(DeAllocateResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/DeAllocate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/DeAllocate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) Portout(ctx context.Context, in *PortoutRequest, opts ...grpc.CallOption) (*PortoutResponse, error) {
+func (c *numberingClient) Portout(ctx context.Context, in *PortoutRequest, opts ...grpc.CallOption) (*PortoutResponse, error) {
 	out := new(PortoutResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/Portout", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/Portout", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) Portin(ctx context.Context, in *PortinRequest, opts ...grpc.CallOption) (*PortinResponse, error) {
+func (c *numberingClient) Portin(ctx context.Context, in *PortinRequest, opts ...grpc.CallOption) (*PortinResponse, error) {
 	out := new(PortinResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/Portin", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/Portin", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
+func (c *numberingClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) View(ctx context.Context, in *ViewRequest, opts ...grpc.CallOption) (*ViewResponse, error) {
+func (c *numberingClient) View(ctx context.Context, in *ViewRequest, opts ...grpc.CallOption) (*ViewResponse, error) {
 	out := new(ViewResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/View", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/View", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *numanClient) Summary(ctx context.Context, in *SummaryRequest, opts ...grpc.CallOption) (*SummaryResponse, error) {
+func (c *numberingClient) Summary(ctx context.Context, in *SummaryRequest, opts ...grpc.CallOption) (*SummaryResponse, error) {
 	out := new(SummaryResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numan/Summary", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/Summary", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// NumanServer is the server API for Numan service.
-// All implementations must embed UnimplementedNumanServer
+// NumberingServer is the server API for Numbering service.
+// All implementations must embed UnimplementedNumberingServer
 // for forward compatibility
-type NumanServer interface {
+type NumberingServer interface {
 	//Adds a new unused number to database.
 	Add(context.Context, *AddRequest) (*AddResponse, error)
 	//Not implemented
@@ -188,334 +188,334 @@ type NumanServer interface {
 	View(context.Context, *ViewRequest) (*ViewResponse, error)
 	//Summary formatted table of usage stats
 	Summary(context.Context, *SummaryRequest) (*SummaryResponse, error)
-	mustEmbedUnimplementedNumanServer()
+	mustEmbedUnimplementedNumberingServer()
 }
 
-// UnimplementedNumanServer must be embedded to have forward compatible implementations.
-type UnimplementedNumanServer struct {
+// UnimplementedNumberingServer must be embedded to have forward compatible implementations.
+type UnimplementedNumberingServer struct {
 }
 
-func (UnimplementedNumanServer) Add(context.Context, *AddRequest) (*AddResponse, error) {
+func (UnimplementedNumberingServer) Add(context.Context, *AddRequest) (*AddResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
 }
-func (UnimplementedNumanServer) AddGroup(context.Context, *AddGroupRequest) (*AddGroupResponse, error) {
+func (UnimplementedNumberingServer) AddGroup(context.Context, *AddGroupRequest) (*AddGroupResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddGroup not implemented")
 }
-func (UnimplementedNumanServer) List(context.Context, *ListRequest) (*ListResponse, error) {
+func (UnimplementedNumberingServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedNumanServer) ListUserID(context.Context, *ListUserIDRequest) (*ListUserIDResponse, error) {
+func (UnimplementedNumberingServer) ListUserID(context.Context, *ListUserIDRequest) (*ListUserIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUserID not implemented")
 }
-func (UnimplementedNumanServer) Reserve(context.Context, *ReserveRequest) (*ReserveResponse, error) {
+func (UnimplementedNumberingServer) Reserve(context.Context, *ReserveRequest) (*ReserveResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Reserve not implemented")
 }
-func (UnimplementedNumanServer) Allocate(context.Context, *AllocateRequest) (*AllocateResponse, error) {
+func (UnimplementedNumberingServer) Allocate(context.Context, *AllocateRequest) (*AllocateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Allocate not implemented")
 }
-func (UnimplementedNumanServer) DeAllocate(context.Context, *DeAllocateRequest) (*DeAllocateResponse, error) {
+func (UnimplementedNumberingServer) DeAllocate(context.Context, *DeAllocateRequest) (*DeAllocateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeAllocate not implemented")
 }
-func (UnimplementedNumanServer) Portout(context.Context, *PortoutRequest) (*PortoutResponse, error) {
+func (UnimplementedNumberingServer) Portout(context.Context, *PortoutRequest) (*PortoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Portout not implemented")
 }
-func (UnimplementedNumanServer) Portin(context.Context, *PortinRequest) (*PortinResponse, error) {
+func (UnimplementedNumberingServer) Portin(context.Context, *PortinRequest) (*PortinResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Portin not implemented")
 }
-func (UnimplementedNumanServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
+func (UnimplementedNumberingServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedNumanServer) View(context.Context, *ViewRequest) (*ViewResponse, error) {
+func (UnimplementedNumberingServer) View(context.Context, *ViewRequest) (*ViewResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method View not implemented")
 }
-func (UnimplementedNumanServer) Summary(context.Context, *SummaryRequest) (*SummaryResponse, error) {
+func (UnimplementedNumberingServer) Summary(context.Context, *SummaryRequest) (*SummaryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Summary not implemented")
 }
-func (UnimplementedNumanServer) mustEmbedUnimplementedNumanServer() {}
+func (UnimplementedNumberingServer) mustEmbedUnimplementedNumberingServer() {}
 
-// UnsafeNumanServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to NumanServer will
+// UnsafeNumberingServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to NumberingServer will
 // result in compilation errors.
-type UnsafeNumanServer interface {
-	mustEmbedUnimplementedNumanServer()
+type UnsafeNumberingServer interface {
+	mustEmbedUnimplementedNumberingServer()
 }
 
-func RegisterNumanServer(s grpc.ServiceRegistrar, srv NumanServer) {
-	s.RegisterService(&Numan_ServiceDesc, srv)
+func RegisterNumberingServer(s grpc.ServiceRegistrar, srv NumberingServer) {
+	s.RegisterService(&Numbering_ServiceDesc, srv)
 }
 
-func _Numan_Add_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_Add_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).Add(ctx, in)
+		return srv.(NumberingServer).Add(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/Add",
+		FullMethod: "/grpc.Numbering/Add",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).Add(ctx, req.(*AddRequest))
+		return srv.(NumberingServer).Add(ctx, req.(*AddRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_AddGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_AddGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddGroupRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).AddGroup(ctx, in)
+		return srv.(NumberingServer).AddGroup(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/AddGroup",
+		FullMethod: "/grpc.Numbering/AddGroup",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).AddGroup(ctx, req.(*AddGroupRequest))
+		return srv.(NumberingServer).AddGroup(ctx, req.(*AddGroupRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).List(ctx, in)
+		return srv.(NumberingServer).List(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/List",
+		FullMethod: "/grpc.Numbering/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).List(ctx, req.(*ListRequest))
+		return srv.(NumberingServer).List(ctx, req.(*ListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_ListUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_ListUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListUserIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).ListUserID(ctx, in)
+		return srv.(NumberingServer).ListUserID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/ListUserID",
+		FullMethod: "/grpc.Numbering/ListUserID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).ListUserID(ctx, req.(*ListUserIDRequest))
+		return srv.(NumberingServer).ListUserID(ctx, req.(*ListUserIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_Reserve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_Reserve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReserveRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).Reserve(ctx, in)
+		return srv.(NumberingServer).Reserve(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/Reserve",
+		FullMethod: "/grpc.Numbering/Reserve",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).Reserve(ctx, req.(*ReserveRequest))
+		return srv.(NumberingServer).Reserve(ctx, req.(*ReserveRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_Allocate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_Allocate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AllocateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).Allocate(ctx, in)
+		return srv.(NumberingServer).Allocate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/Allocate",
+		FullMethod: "/grpc.Numbering/Allocate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).Allocate(ctx, req.(*AllocateRequest))
+		return srv.(NumberingServer).Allocate(ctx, req.(*AllocateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_DeAllocate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_DeAllocate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeAllocateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).DeAllocate(ctx, in)
+		return srv.(NumberingServer).DeAllocate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/DeAllocate",
+		FullMethod: "/grpc.Numbering/DeAllocate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).DeAllocate(ctx, req.(*DeAllocateRequest))
+		return srv.(NumberingServer).DeAllocate(ctx, req.(*DeAllocateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_Portout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_Portout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PortoutRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).Portout(ctx, in)
+		return srv.(NumberingServer).Portout(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/Portout",
+		FullMethod: "/grpc.Numbering/Portout",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).Portout(ctx, req.(*PortoutRequest))
+		return srv.(NumberingServer).Portout(ctx, req.(*PortoutRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_Portin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_Portin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PortinRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).Portin(ctx, in)
+		return srv.(NumberingServer).Portin(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/Portin",
+		FullMethod: "/grpc.Numbering/Portin",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).Portin(ctx, req.(*PortinRequest))
+		return srv.(NumberingServer).Portin(ctx, req.(*PortinRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).Delete(ctx, in)
+		return srv.(NumberingServer).Delete(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/Delete",
+		FullMethod: "/grpc.Numbering/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).Delete(ctx, req.(*DeleteRequest))
+		return srv.(NumberingServer).Delete(ctx, req.(*DeleteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_View_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_View_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ViewRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).View(ctx, in)
+		return srv.(NumberingServer).View(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/View",
+		FullMethod: "/grpc.Numbering/View",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).View(ctx, req.(*ViewRequest))
+		return srv.(NumberingServer).View(ctx, req.(*ViewRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numan_Summary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Numbering_Summary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SummaryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumanServer).Summary(ctx, in)
+		return srv.(NumberingServer).Summary(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numan/Summary",
+		FullMethod: "/grpc.Numbering/Summary",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumanServer).Summary(ctx, req.(*SummaryRequest))
+		return srv.(NumberingServer).Summary(ctx, req.(*SummaryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Numan_ServiceDesc is the grpc.ServiceDesc for Numan service.
+// Numbering_ServiceDesc is the grpc.ServiceDesc for Numbering service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Numan_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.Numan",
-	HandlerType: (*NumanServer)(nil),
+var Numbering_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "grpc.Numbering",
+	HandlerType: (*NumberingServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Add",
-			Handler:    _Numan_Add_Handler,
+			Handler:    _Numbering_Add_Handler,
 		},
 		{
 			MethodName: "AddGroup",
-			Handler:    _Numan_AddGroup_Handler,
+			Handler:    _Numbering_AddGroup_Handler,
 		},
 		{
 			MethodName: "List",
-			Handler:    _Numan_List_Handler,
+			Handler:    _Numbering_List_Handler,
 		},
 		{
 			MethodName: "ListUserID",
-			Handler:    _Numan_ListUserID_Handler,
+			Handler:    _Numbering_ListUserID_Handler,
 		},
 		{
 			MethodName: "Reserve",
-			Handler:    _Numan_Reserve_Handler,
+			Handler:    _Numbering_Reserve_Handler,
 		},
 		{
 			MethodName: "Allocate",
-			Handler:    _Numan_Allocate_Handler,
+			Handler:    _Numbering_Allocate_Handler,
 		},
 		{
 			MethodName: "DeAllocate",
-			Handler:    _Numan_DeAllocate_Handler,
+			Handler:    _Numbering_DeAllocate_Handler,
 		},
 		{
 			MethodName: "Portout",
-			Handler:    _Numan_Portout_Handler,
+			Handler:    _Numbering_Portout_Handler,
 		},
 		{
 			MethodName: "Portin",
-			Handler:    _Numan_Portin_Handler,
+			Handler:    _Numbering_Portin_Handler,
 		},
 		{
 			MethodName: "Delete",
-			Handler:    _Numan_Delete_Handler,
+			Handler:    _Numbering_Delete_Handler,
 		},
 		{
 			MethodName: "View",
-			Handler:    _Numan_View_Handler,
+			Handler:    _Numbering_View_Handler,
 		},
 		{
 			MethodName: "Summary",
-			Handler:    _Numan_Summary_Handler,
+			Handler:    _Numbering_Summary_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "numan.proto",
+	Metadata: "numbering.proto",
 }

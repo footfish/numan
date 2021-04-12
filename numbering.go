@@ -1,6 +1,7 @@
 package numan
 
 import (
+	"context"
 	"errors"
 	"regexp"
 )
@@ -14,8 +15,8 @@ const (
 	QUARANTINE = 13 * 31 * 24 * 60 * 60 //  (13 months approx)
 )
 
-//Number represents a stored phone number entry
-type Number struct {
+//Numbering represents a stored phone number entry
+type Numbering struct {
 	ID          int64  // number entry index
 	E164        E164   //an e.164 number
 	Used        bool   // indicates number is actively being used or not (reserved, allocated).
@@ -51,33 +52,33 @@ type NumberFilter struct {
 	PortedOut   bool   // if number was ported out
 }
 
-//NumberAPI exposes interface for managing numbers
-type NumberAPI interface {
+//NumberingService exposes interface for managing numbers
+type NumberingService interface {
 	//Adds a new unused number to database.
 	//params E164, Domain & Carrier must be included, others (supplied or not) are initialised.
-	Add(number *Number) error
+	Add(ctx context.Context, number *Numbering) error
 	//AddGroup adds a series of new unused numbers
-	AddGroup()
+	AddGroup(ctx context.Context)
 	//List returns a filtered list of numbers
-	List(filter *NumberFilter) ([]Number, error)
+	List(ctx context.Context, filter *NumberFilter) ([]Numbering, error)
 	//ListUserID gets list of numbers attached to specific UserID
-	ListUserID(userID int64) ([]Number, error)
+	ListUserID(ctx context.Context, userID int64) ([]Numbering, error)
 	//Reserve locks a number to a UserID until untilTS (unix timestamp)
-	Reserve(number *E164, userID *int64, untilTS *int64) error
+	Reserve(ctx context.Context, number *E164, userID *int64, untilTS *int64) error
 	//Allocate marks a number 'used' by a User
-	Allocate(number *E164, userID *int64) error
+	Allocate(ctx context.Context, number *E164, userID *int64) error
 	//DeAllocate number from User (number goes to quarantine)
-	DeAllocate(number *E164) error
+	DeAllocate(ctx context.Context, number *E164) error
 	//Portout sets a port out date (just a log, doesn't care about state or do anything else)
-	Portout(number *E164, PortoutTS *int64) error
+	Portout(ctx context.Context, number *E164, PortoutTS *int64) error
 	//Portin sets a port in date (just a log, doesn't care about state or do anything else)
-	Portin(number *E164, PortinTS *int64) error
+	Portin(ctx context.Context, number *E164, PortinTS *int64) error
 	//Delete - number no longer used, removed from number db, must be unused (history kept).
-	Delete(number *E164) error
+	Delete(ctx context.Context, number *E164) error
 	//View formatted table of details for a specific number (with history).
-	View(number *E164) (string, error)
+	View(ctx context.Context, number *E164) (string, error)
 	//Summary formatted table of usage stats
-	Summary() (string, error)
+	Summary(ctx context.Context) (string, error)
 }
 
 //ValidE164 validates an phonenumber is E164

@@ -6,7 +6,9 @@ import (
 	"net"
 
 	"github.com/footfish/numan/api/grpc"
+	"github.com/footfish/numan/internal/datastore"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -18,6 +20,12 @@ const (
 )
 
 func main() {
+
+	//Database
+	store := datastore.NewStore(dsn)
+	defer store.Close()
+
+	//Prep server
 	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 	if err != nil {
 		log.Fatalf("Failed to setup tls: %v", err)
@@ -27,11 +35,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("Starting gRPC user service on %s...\n", lis.Addr().String())
 
-	grpcServer, numanServerAdapter := grpc.NewGrpcServer(dsn, creds)
-	grpc.RegisterNumanServer(grpcServer, numanServerAdapter)
-	defer grpc.CloseServerAdapter(numanServerAdapter)
+	//GRPC
+	log.Printf("Starting gRPC user service on %s...\n", lis.Addr().String())
+	grpcServer := grpc.NewGrpcServer(creds)
+
+	numberingServerAdapter := grpc.NewNumberingServerAdapter(store)
+	userServerAdapter := grpc.NewUserServerAdapter(store)
+
+	grpc.RegisterNumberingServer(grpcServer, numberingServerAdapter)
+	grpc.RegisterUserServer(grpcServer, userServerAdapter)
+
+	reflection.Register(grpcServer)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		panic(err)

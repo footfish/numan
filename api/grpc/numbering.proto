@@ -3,7 +3,7 @@ package grpc;
 
 option go_package = "https://github.com/footfish/numan/api/grpc";
 
-service Numan {
+service Numbering {
     //Adds a new unused number to database.
     rpc Add (AddRequest) returns (AddResponse) {}
     //Not implemented 

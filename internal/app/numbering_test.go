@@ -1,14 +1,16 @@
 package app_test
 
 //Run tests from numan root with;
-//go test -v -cover ./internal/app
+//go test -v -cover ./internal/app -coverpkg github.com/footfish/numan/internal/app,github.com/footfish/numan/internal/store
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/footfish/numan"
 	. "github.com/footfish/numan/internal/app"
+	"github.com/footfish/numan/internal/datastore"
 )
 
 // validPhoneNumbers
@@ -41,17 +43,21 @@ var invalidPhoneNumbers = []numan.E164{
 }
 
 func TestDelete(t *testing.T) {
-	nu := HelperNewNumberService(t)
-	defer nu.Close()
+	nu, store := HelperNewNumberingService(t)
+	defer store.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
 	//Add
-	if err := nu.Add(&numan.Number{E164: validPhoneNumbers[0], Domain: "anydomain.com", Carrier: "anycarrier"}); err != nil {
+	if err := nu.Add(ctx, &numan.Numbering{E164: validPhoneNumbers[0], Domain: "anydomain.com", Carrier: "anycarrier"}); err != nil {
 		t.Fatal(err)
 	}
 	//Delete
-	if err := nu.Delete(&validPhoneNumbers[0]); err != nil {
+	if err := nu.Delete(ctx, &validPhoneNumbers[0]); err != nil {
 		t.Fatal(err)
 	}
-	if foundNumber, err := nu.List(&numan.NumberFilter{E164: validPhoneNumbers[0]}); err != nil {
+	if foundNumber, err := nu.List(ctx, &numan.NumberFilter{E164: validPhoneNumbers[0]}); err != nil {
 		t.Fatal(err)
 	} else if want, got := 0, len(foundNumber); want != got {
 		t.Fatalf("Delete, found %v, want %v", got, want)
@@ -60,20 +66,24 @@ func TestDelete(t *testing.T) {
 
 func TestReserve(t *testing.T) {
 	t.Run("OkReserveNumber", func(t *testing.T) {
-		nu := HelperNewNumberService(t)
-		defer nu.Close()
+		nu, store := HelperNewNumberingService(t)
+		defer store.Close()
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
 		//Add
-		if err := nu.Add(&numan.Number{E164: validPhoneNumbers[0], Domain: "anydomain.com", Carrier: "anycarrier"}); err != nil {
+		if err := nu.Add(ctx, &numan.Numbering{E164: validPhoneNumbers[0], Domain: "anydomain.com", Carrier: "anycarrier"}); err != nil {
 			t.Fatal(err)
 		}
 		//Reserve
 		untilTS := time.Now().Unix() + (60 * 15) //15mins
 		userID := int64(99)
-		if err := nu.Reserve(&validPhoneNumbers[0], &userID, &untilTS); err != nil {
+		if err := nu.Reserve(ctx, &validPhoneNumbers[0], &userID, &untilTS); err != nil {
 			t.Fatal(err)
 		}
 		//Read & check
-		if storedNumber, err := nu.List(&numan.NumberFilter{E164: validPhoneNumbers[0]}); err != nil {
+		if storedNumber, err := nu.List(ctx, &numan.NumberFilter{E164: validPhoneNumbers[0]}); err != nil {
 			t.Fatal(err)
 		} else if want, got := untilTS, storedNumber[0].Reserved; want != got { //Cc
 			t.Fatalf("Reserved got %v, want %v", got, want)
@@ -84,11 +94,15 @@ func TestReserve(t *testing.T) {
 
 func TestListUserId(t *testing.T) {
 	t.Run("OkListUserId", func(t *testing.T) {
-		nu := HelperNewNumberService(t)
-		defer nu.Close()
+		nu, store := HelperNewNumberingService(t)
+		defer store.Close()
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
 		//Add
 		for i := 0; i < len(validPhoneNumbers); i++ {
-			if err := nu.Add(&numan.Number{E164: validPhoneNumbers[i], Domain: "anydomain.com", Carrier: "anycarrier"}); err != nil {
+			if err := nu.Add(ctx, &numan.Numbering{E164: validPhoneNumbers[i], Domain: "anydomain.com", Carrier: "anycarrier"}); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -96,12 +110,12 @@ func TestListUserId(t *testing.T) {
 		untilTS := time.Now().Unix() + (60 * 15) //15mins
 		userID := int64(99)
 		for i := 0; i < 2; i++ {
-			if err := nu.Reserve(&validPhoneNumbers[i], &userID, &untilTS); err != nil {
+			if err := nu.Reserve(ctx, &validPhoneNumbers[i], &userID, &untilTS); err != nil {
 				t.Fatal(err)
 			}
 		}
 		//Read & check
-		if storedNumber, err := nu.ListUserID(userID); err != nil {
+		if storedNumber, err := nu.ListUserID(ctx, userID); err != nil {
 			t.Fatal(err)
 		} else if want, got := 2, len(storedNumber); want != got { //Cc
 			t.Fatalf("ListUserId got %v, want %v", got, want)
@@ -113,13 +127,17 @@ func TestListUserId(t *testing.T) {
 func TestAdd(t *testing.T) {
 	//Verifiy basic Add
 	t.Run("OkAddDeletePhoneNumber", func(t *testing.T) {
-		nu := HelperNewNumberService(t)
-		defer nu.Close()
+		nu, store := HelperNewNumberingService(t)
+		defer store.Close()
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
 		//Verify a number can be added and read back
-		if err := nu.Add(&numan.Number{E164: validPhoneNumbers[0], Domain: "anydomain.com", Carrier: "anycarrier"}); err != nil {
+		if err := nu.Add(ctx, &numan.Numbering{E164: validPhoneNumbers[0], Domain: "anydomain.com", Carrier: "anycarrier"}); err != nil {
 			t.Fatal(err)
 		}
-		if storedNumber, err := nu.List(&numan.NumberFilter{E164: validPhoneNumbers[0]}); err != nil {
+		if storedNumber, err := nu.List(ctx, &numan.NumberFilter{E164: validPhoneNumbers[0]}); err != nil {
 			t.Fatal(err)
 		} else if want, got := validPhoneNumbers[0].Cc, storedNumber[0].E164.Cc; want != got { //Cc
 			t.Fatalf("Cc got %v, want %v", got, want)
@@ -151,14 +169,18 @@ func TestAdd(t *testing.T) {
 
 	//Verifiy required parameters
 	t.Run("ErrRequiredFields", func(t *testing.T) {
-		nu := HelperNewNumberService(t)
-		defer nu.Close()
-		if err := nu.Add(&numan.Number{E164: validPhoneNumbers[0], Domain: "", Carrier: "anycarrier"}); err == nil {
+		nu, store := HelperNewNumberingService(t)
+		defer store.Close()
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		if err := nu.Add(ctx, &numan.Numbering{E164: validPhoneNumbers[0], Domain: "", Carrier: "anycarrier"}); err == nil {
 			t.Fatal("Number added without domain")
 		} else if want, got := "Carrier & domain required", err.Error(); want != got {
 			t.Fatalf("Error '"+err.Error()+"' does not match '%v'", want)
 		}
-		if err := nu.Add(&numan.Number{E164: validPhoneNumbers[0], Domain: "anydomain", Carrier: ""}); err == nil {
+		if err := nu.Add(ctx, &numan.Numbering{E164: validPhoneNumbers[0], Domain: "anydomain", Carrier: ""}); err == nil {
 			t.Fatal("Number added without carrier")
 		} else if want, got := "Carrier & domain required", err.Error(); want != got {
 			t.Fatalf("Error '"+err.Error()+"' does not include '%v'", want)
@@ -167,10 +189,14 @@ func TestAdd(t *testing.T) {
 
 	//Verify all valid phone numbers can be added
 	t.Run("OkValidPhoneNumbers", func(t *testing.T) {
-		nu := HelperNewNumberService(t)
-		defer nu.Close()
+		nu, store := HelperNewNumberingService(t)
+		defer store.Close()
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
 		for _, phoneNumber := range validPhoneNumbers {
-			if err := nu.Add(&numan.Number{E164: phoneNumber, Domain: "anydomain.com", Carrier: "anycarrier", Used: true}); err != nil {
+			if err := nu.Add(ctx, &numan.Numbering{E164: phoneNumber, Domain: "anydomain.com", Carrier: "anycarrier", Used: true}); err != nil {
 				t.Fatalf(err.Error()+"number %v-%v-%v", phoneNumber.Cc, phoneNumber.Ndc, phoneNumber.Sn)
 			}
 		}
@@ -178,10 +204,14 @@ func TestAdd(t *testing.T) {
 
 	//Verify invalid phone numbers can't be added
 	t.Run("ErrInvalidPhoneNumbers", func(t *testing.T) {
-		nu := HelperNewNumberService(t)
-		defer nu.Close()
+		nu, store := HelperNewNumberingService(t)
+		defer store.Close()
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
 		for _, phoneNumber := range invalidPhoneNumbers {
-			if err := nu.Add(&numan.Number{E164: phoneNumber, Domain: "anydomain.com", Carrier: "anycarrier", Used: true}); err == nil {
+			if err := nu.Add(ctx, &numan.Numbering{E164: phoneNumber, Domain: "anydomain.com", Carrier: "anycarrier", Used: true}); err == nil {
 				t.Fatalf("Added invalid number %v-%v-%v", phoneNumber.Cc, phoneNumber.Ndc, phoneNumber.Sn)
 			}
 		}
@@ -190,7 +220,8 @@ func TestAdd(t *testing.T) {
 }
 
 // NewNumberService instantiates a new NuService.
-func HelperNewNumberService(t *testing.T) numan.API {
+func HelperNewNumberingService(t *testing.T) (numan.NumberingService, *datastore.Store) {
 	t.Helper()
-	return NewNumanService(":memory:")
+	store := datastore.NewStore(":memory:")
+	return NewNumberingService(store), store
 }
