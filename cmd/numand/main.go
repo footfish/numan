@@ -27,8 +27,6 @@ func main() {
 		log.Fatalf("Failed to load required environmental variables for config: %v", err)
 	}
 
-	fmt.Println("dsn", conf.Dsn)
-
 	//Database
 	store := datastore.NewStore(conf.Dsn)
 	defer store.Close()
@@ -41,7 +39,7 @@ func main() {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", conf.Port))
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to listen: %v", err)
 	}
 
 	//GRPC
@@ -57,7 +55,7 @@ func main() {
 	reflection.Register(grpcServer)
 
 	if err := grpcServer.Serve(lis); err != nil {
-		panic(err)
+		log.Fatalf("gRPC server failed to serve: %v", err)
 	}
 
 }
