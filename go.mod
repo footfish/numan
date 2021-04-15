@@ -7,18 +7,16 @@ replace github.com/footfish/numan => ./
 replace github.com/footfish/numan/datastore => ./datastore
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/protobuf v1.4.3
 	github.com/gookit/color v1.3.7
-	github.com/kr/pretty v0.1.0 // indirect
+	github.com/joho/godotenv v1.3.0
+	github.com/vrischmann/envconfig v1.3.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/sys v0.0.0-20210301091718-77cc2087c03b // indirect
 	golang.org/x/text v0.3.5 // indirect
 	google.golang.org/genproto v0.0.0-20210302154924-ca353664deba // indirect
 	google.golang.org/grpc v1.37.0
 	google.golang.org/protobuf v1.25.0
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/yaml.v2 v2.2.8 // indirect
 	modernc.org/sqlite v1.8.7
 )

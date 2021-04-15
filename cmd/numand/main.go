@@ -2,36 +2,44 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 
 	"github.com/footfish/numan/api/grpc"
 	"github.com/footfish/numan/internal/datastore"
+	_ "github.com/joho/godotenv/autoload" //autoloads .env file
+	"github.com/vrischmann/envconfig"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
-const (
-	//dsn is path to sqlite db file
-	dsn      = "./examples/numan-sqlite.db"
-	certFile = "./examples/cert.pem"
-	keyFile  = "./examples/key.pem"
-	port     = ":50051"
-)
-
 func main() {
+	var conf struct {
+		Dsn     string
+		Port    int `envconfig:"default=50051,optional"`
+		TlsCert string
+		TlsKey  string
+	}
+
+	//Load conf from environmental vars (.env file autoloaded if present)
+	if err := envconfig.Init(&conf); err != nil {
+		log.Fatalf("Failed to load required environmental variables for config: %v", err)
+	}
+
+	fmt.Println("dsn", conf.Dsn)
 
 	//Database
-	store := datastore.NewStore(dsn)
+	store := datastore.NewStore(conf.Dsn)
 	defer store.Close()
 
 	//Prep server
-	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
+	creds, err := credentials.NewServerTLSFromFile(conf.TlsCert, conf.TlsKey)
 	if err != nil {
 		log.Fatalf("Failed to setup tls: %v", err)
 	}
 
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", conf.Port))
 	if err != nil {
 		panic(err)
 	}
