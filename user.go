@@ -13,9 +13,6 @@ import (
 //auth a user
 //validate a token (internal)
 const (
-	ADMIN         = "admin"  //TODO testing remove
-	USER          = "user"   //TODO testing remove
-	PASSWORD      = "secret" //TODO testing remove
 	secretKey     = "secret"
 	tokenDuration = 15 * time.Minute
 	//tokenDuration  = 1 * time.Minute //TODO testing

@@ -1,4 +1,4 @@
-# numan - a (phone) number management tool 
+# numan - a phone number management tool 
 
 This is an example Go project. It's a simple command line tool to keep track of phone number allocations. 
 
@@ -6,8 +6,8 @@ It's a learning project. The main purpose is to:
 - explore suitable Go project layout. 
 - explore using gRPC with REST endpoint. 
 
-The project loosely uses a domain driven design and [standard Go project layout](https://github.com/golang-standards/project-layout). The main business objects being a 'number'(record) and a change 'history'. 
-The convention followed here is defining the business objects in root then layering the packages using interface (I guess you could call this Go's version of method overloading ). 
+The project loosely uses domain driven design and the  [standard Go project layout](https://github.com/golang-standards/project-layout). The main business objects being a 'numbering' record and a change 'history'. 
+The business objects are defined in root, then object logic is 'layered' using the root interface (I guess you could call this Go's version of method overloading ). 
 
 To demonstrate using an example from the project folders. 
 
@@ -24,7 +24,6 @@ This pattern allows for:
 - improve error handling 
 - expand tests 
 - client config file 
-- server config
 - setup command user roles 
 - number history 
 - memory store for user auth
@@ -47,9 +46,23 @@ $ go install ./cmd/...
 
 ### Server 
 
-Install certs - see [/scripts/gen_certs.sh](./scripts/gen_certs.sh)
 
-`$ $GOPATH/bin/numand &      #start server`
+Try example: 
+```
+#Use example files 
+$ cd example 
+
+$ $GOPATH/bin/numand &      
+```
+
+Alternatively:
+* Install certs - see [/scripts/gen_certs.sh](./scripts/gen_certs.sh)
+* Set environmental vars in file _numand.env_ ([example numand.env](./examples/numand.env))
+
+```
+$ $GOPATH/bin/numand &      
+```
+
 
 ### Client 
 

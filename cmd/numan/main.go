@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -16,15 +17,9 @@ import (
 	"github.com/footfish/numan/internal/cmdcli"
 	"github.com/footfish/numan/internal/datastore"
 	"github.com/gookit/color"
+	"github.com/joho/godotenv"
+	"github.com/vrischmann/envconfig"
 	"google.golang.org/grpc/credentials"
-)
-
-const (
-	//DSN is path to sqlite file
-	dsn = "./examples/numan-sqlite.db"
-	//address = "localhost:50051"
-	certFile  = "./examples/server-cert.pem"
-	tokenFile = ".numan_auth"
 )
 
 type client struct {
@@ -35,20 +30,34 @@ type client struct {
 	auth      numan.User      //TODO do I need this now I have user.
 }
 
+var conf struct {
+	Dsn           string
+	ServerAddress string `envconfig:"optional"` //if ommitted works in standalone mode
+	TlsCert       string
+	TokenFile     string `envconfig:"default=.numan_auth, optional"`
+	User          string
+	Password      string
+}
+
 func main() {
+	//Init conf from environmental vars
+	godotenv.Load("numan.env")
+	if err := envconfig.Init(&conf); err != nil {
+		log.Fatalf("Failed to load required environmental variables for config: %v", err)
+	}
+
 	var c client
-	rpcAddress := os.Getenv("RPC_ADDRESS")
-	if rpcAddress == "" { //standalone application with local db connection
-		store := datastore.NewStore(dsn)
+	if conf.ServerAddress == "" { //standalone application with local db connection
+		store := datastore.NewStore(conf.Dsn)
 		defer store.Close()
 		c.numbering = app.NewNumberingService(store)
 		c.history = app.NewHistoryService(store)
 		c.user = app.NewUserService(store)
 	} else { //via gRPC
 		creds := credentials.NewTLS(&tls.Config{})
-		grpcClient := grpc.NewGrpcClient(rpcAddress, creds)
+		grpcClient := grpc.NewGrpcClient(conf.ServerAddress, creds)
 		c.numbering = grpc.NewNumberingClientAdapter(grpcClient)
-		//		c.history = grpc.NewHistoryClientAdapter(rpcAddress, creds)
+		//		c.history = grpc.NewHistoryClientAdapter(grpcClient)
 		c.user = grpc.NewUserClientAdapter(grpcClient)
 	}
 
@@ -68,20 +77,19 @@ func main() {
 
 func (c *client) setAuthToken() (err error) {
 	//load file token
-	if fileData, err := ioutil.ReadFile(tokenFile); err == nil {
+	if fileData, err := ioutil.ReadFile(conf.TokenFile); err == nil {
 		c.auth.AccessToken = string(fileData)
 		//fmt.Println("Loaded token:", c.auth.AccessToken)
 	}
 	if c.auth.AuthRefreshRequired() {
 		//need to fetch a token.
-		//TODO - Testing, replace with config
-		if c.auth, err = c.user.Auth(c.ctx, numan.USER, numan.PASSWORD); err != nil {
+		if c.auth, err = c.user.Auth(c.ctx, conf.User, conf.Password); err != nil {
 			return err
 		}
 
 		//Cache token
-		if err := ioutil.WriteFile(tokenFile, []byte(c.auth.AccessToken), 0600); err != nil {
-			color.Error.Println("Can't write to file -", tokenFile)
+		if err := ioutil.WriteFile(conf.TokenFile, []byte(c.auth.AccessToken), 0600); err != nil {
+			color.Error.Println("Can't write to file -", conf.TokenFile)
 			os.Exit(1)
 		}
 		return nil

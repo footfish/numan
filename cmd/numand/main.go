@@ -8,7 +8,7 @@ import (
 
 	"github.com/footfish/numan/api/grpc"
 	"github.com/footfish/numan/internal/datastore"
-	_ "github.com/joho/godotenv/autoload" //autoloads .env file
+	"github.com/joho/godotenv"
 	"github.com/vrischmann/envconfig"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
@@ -22,7 +22,8 @@ func main() {
 		TlsKey  string
 	}
 
-	//Load conf from environmental vars (.env file autoloaded if present)
+	//Init conf from environmental vars
+	godotenv.Load("numand.env")
 	if err := envconfig.Init(&conf); err != nil {
 		log.Fatalf("Failed to load required environmental variables for config: %v", err)
 	}
