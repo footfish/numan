@@ -18,6 +18,7 @@ import (
 	"github.com/footfish/numan/internal/datastore"
 	"github.com/gookit/color"
 	"github.com/joho/godotenv"
+	"github.com/lensesio/tableprinter"
 	"github.com/vrischmann/envconfig"
 	"google.golang.org/grpc/credentials"
 )
@@ -201,10 +202,7 @@ func (c *client) list(p cmdcli.RxParameters) {
 		color.Warn.Println(err)
 		os.Exit(1)
 	} else {
-		color.Info.Printf("Found %v\n", len(numberList))
-		for _, n := range numberList {
-			fmt.Println(colorize(fmt.Sprintf("%+v", n)))
-		}
+		printNumberList(numberList)
 	}
 }
 
@@ -244,18 +242,24 @@ func (c *client) portin(p cmdcli.RxParameters) {
 
 //list_free <phonenumber>
 func (c *client) listFree(p cmdcli.RxParameters) {
-	filter := numan.NumberFilter{State: 1} //1 = free
+	var filter numan.NumberFilter
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
 
 	if len(splitNumber) == 2 {
-		filter = numan.NumberFilter{E164: numan.E164{
-			Cc:  splitNumber[0],
-			Ndc: splitNumber[1]}}
+		filter = numan.NumberFilter{
+			E164: numan.E164{
+				Cc:  splitNumber[0],
+				Ndc: splitNumber[1]},
+			State: 1, //free
+		}
 	} else {
-		filter = numan.NumberFilter{E164: numan.E164{
-			Cc:  splitNumber[0],
-			Ndc: splitNumber[1],
-			Sn:  splitNumber[2]}}
+		filter = numan.NumberFilter{
+			E164: numan.E164{
+				Cc:  splitNumber[0],
+				Ndc: splitNumber[1],
+				Sn:  splitNumber[2]},
+			State: 1, //free
+		}
 	}
 
 	if domain, ok := p["domain"].(string); ok {
@@ -266,10 +270,7 @@ func (c *client) listFree(p cmdcli.RxParameters) {
 		color.Warn.Println(err)
 		os.Exit(1)
 	} else {
-		color.Info.Printf("Found %v\n", len(numberList))
-		for _, n := range numberList {
-			fmt.Println(colorize(fmt.Sprintf("%+v", n)))
-		}
+		printNumberList(numberList)
 	}
 }
 
@@ -392,18 +393,54 @@ func (c *client) listUser(p cmdcli.RxParameters) {
 		color.Warn.Println(err)
 		os.Exit(1)
 	} else {
-		color.Info.Printf("Found %v\n", len(numberList))
-		for _, n := range numberList {
-			fmt.Println(colorize(fmt.Sprintf("%+v", n)))
-		}
+		printNumberList(numberList)
 	}
 }
 
-//colorize adds a bit of colour to formated strings (struct)
-func colorize(s string) string {
-	space := fmt.Sprintf(" "+color.SettingTpl, color.Cyan)
-	colon := fmt.Sprintf(":"+color.SettingTpl, color.White)
-	curley := fmt.Sprintf("{"+color.SettingTpl, color.Cyan)
-	s = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(s, ":", colon), "{", curley), " ", space)
-	return s
+//printNumberList prints slice of numan.Numbering as a table
+func printNumberList(numberList []numan.Numbering) {
+	printer := tableprinter.New(os.Stdout)
+
+	type tableRow struct {
+		ID          int64  `header:"ID"`
+		Number      string `header:"Number"`
+		Domain      string `header:"Domain"`
+		Carrier     string `header:"Carrier"`
+		UserID      int64  `header:"User"`
+		Used        bool   `header:"Used"`
+		Allocated   string `header:"Allocated"`
+		Reserved    string `header:"Reserved"`
+		DeAllocated string `header:"De-alloc'd"`
+		PortedIn    string `header:"Port IN"`
+		PortedOut   string `header:"Port OUT"`
+	}
+	table := []tableRow{}
+
+	printer.BorderTop, printer.BorderBottom, printer.BorderLeft, printer.BorderRight = true, true, true, true
+	printer.CenterSeparator = "│"
+	printer.ColumnSeparator = "│"
+	printer.RowSeparator = "─"
+
+	dateConv := func(unixTime int64) string {
+		if unixTime == 0 {
+			return "-"
+		}
+		return time.Unix(unixTime, 0).Format(numan.DATEPRINTFORMAT)
+	}
+
+	for _, n := range numberList {
+		table = append(table, tableRow{ID: n.ID,
+			UserID:      n.UserID,
+			Domain:      n.Domain,
+			Carrier:     n.Carrier,
+			Number:      fmt.Sprintf("%v-%v-%v", n.E164.Cc, n.E164.Ndc, n.E164.Sn),
+			Used:        n.Used,
+			Allocated:   dateConv(n.Allocated),
+			Reserved:    dateConv(n.Reserved),
+			DeAllocated: dateConv(n.DeAllocated),
+			PortedIn:    dateConv(n.PortedIn),
+			PortedOut:   dateConv(n.PortedOut),
+		})
+	}
+	printer.Print(table)
 }
