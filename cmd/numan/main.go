@@ -35,7 +35,7 @@ var conf struct {
 	Dsn           string
 	ServerAddress string `envconfig:"optional"` //if ommitted works in standalone mode
 	TlsCert       string `envconfig:"optional"` //if ommitted trusted Certificate Authority is needed
-	TokenFile     string `envconfig:"default=.numan_auth, optional"`
+	TokenFile     string `envconfig:"default=.numan_auth"`
 	User          string
 	Password      string
 }

@@ -1,18 +1,20 @@
 # numan - a phone number management tool 
 
-This is an example Go project. It's a simple command line tool and gRPC API to keep track of phone number allocations/reservations stored in an sqlite db. 
+This is an example Go project. It's a simple command line tool to keep track of phone number allocations/reservations (for a service provider). It's implemented as a gRPC microservice. Data is stored in an sqlite db. 
 
 It's a personal learning project (to replace an excel file). The main purpose is to:
 - explore suitable Go project layout. 
 - explore using gRPC (and perhaps extending to expose gRPC via REST ). 
 
-The project loosely uses domain driven design and the  [standard Go project layout](https://github.com/golang-standards/project-layout). The main business objects being a 'numbering' record and a change 'history'. 
-The business objects are defined in root, then object logic is 'layered' using the root interface (I guess you could call this Go's version of method overloading ). 
+The project loosely uses [DDD (domain driven design)](https://en.wikipedia.org/wiki/Domain-driven_design) and the  [standard Go project layout](https://github.com/golang-standards/project-layout). 
+
+DDD's main principle is that classes should match the business domain. In this case the main _business objects_ being a 'numbering' record and a change 'history'. 
+For this project the _business objects_ are defined in root, then object logic is 'layered' using the root interface (I guess you could call this Go's version of method overloading ). 
 
 To demonstrate using an example from the project folders. 
 
-- 'numbering' is a business object 
-- /numbering.go <- this defines the business object API ie. interface and structs  
+- 'numbering' is a _business object_ 
+- /numbering.go <- this defines the _business object API_ ie. interface and structs  
 - /internal/app/numbering.go <- this implements the number interface to the overall application 
 - /internal/datastore/numbering.go <- this implements the number interface to storage 
 
@@ -20,15 +22,52 @@ This pattern allows for:
 - Easily changing/adding new layers. For example swapping to a different storage mechanism. 
 - Avoids circular dependencies (which go does not allow). 
 
-## TODO
-- improve error handling 
-- expand tests 
-- setup command user roles 
-- number history 
-- memory store for user auth
-- sanity check/verification of user/pass 
-- add/remove call for users 
-- add/remove users command 
+## Usage 
+
+```
+General Usage:-
+        numan command <param1> [param2] [..]. 
+                Syntax: <mandatory> , [optional] 
+
+Supported Commands:-
+        summary
+                Provides a summary of number database
+
+        add <phonenumber> <domain> <carrier>
+                Adds a new number to the database. Number format is cc-ndc-sn
+
+        list_free <phonenumber> [domain] 
+                Lists available numbers in db entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted
+
+        view <phonenumber>
+                Views all details and history for number entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted
+
+        reserve <phonenumber> <uid> <minutes>
+                Reserves a number for a user for a number of minutes
+
+        portout <phonenumber> <date>
+                Sets a porting out date (dd/mm/yy)
+
+        deallocate <phonenumber>
+                De-allocates a number from a user
+
+        list <phonenumber> [domain] 
+                Lists number db entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted
+
+        list_user <uid>
+                Lists numbers for a user
+
+        delete <phonenumber>
+                Deletes a number permentantly (history retained)
+
+        portin <phonenumber> <date>
+                Sets a porting in date (dd/mm/yy)
+
+        allocate <phonenumber> <uid>
+                Allocates a number to a user
+
+```  
+
 
 ## Installation
 This installation uses Go modules so should not installed in your $GOPATH (of course you will need Go installed to compile)
@@ -98,7 +137,7 @@ $ numan view 353-01-12345111    # view all details for numer 353-01-12345111
 
 
 
-### Problems
+### Runtime Problems
 
 #### 1. You get unusual characters in command printout (as shown below).
 A terminal which supports ANSI colors is required. If the command printout looks something like below, then your terminal is not supporting ANSI colours/escape sequences correctly. 
@@ -107,14 +146,12 @@ A terminal which supports ANSI colors is required. If the command printout looks
 General Usage:-←[0m
 ......
 ```
-#### 2. MessageI 'Failed to load required environmental variables for config'.
+#### 2. Message: 'Failed to load required environmental variables for config'.
 You need to set environmental variables or read from a file. See examples folder. 
 
 #### 3. Message: 'Authentication error x509: certificate signed by unknown authority"
 Check the config environmental variable TLS_CERT. If using a self-signed cert then this must be set. 
 See section on running client-server above for more detials.
-
-
 
 ## General Application Requirements 
 - remote API & command interface
@@ -128,11 +165,21 @@ See section on running client-server above for more detials.
 - load in batches / individually 
 - remove numbers 
 - log number history 
-- log user history (who/what cancelled & when) 
+- lo
+g user history (who/what cancelled & when) 
 - number search with wild card. 
 - single user per number 
 - log of porting 
 
+## TODO
+- improve error handling 
+- expand tests 
+- setup command user roles 
+- number history 
+- memory store for user auth
+- sanity check/verification of user/pass 
+- add/remove call for users 
+- add/remove users command 
 
 ## Project folder structure 
 ```
@@ -141,14 +188,14 @@ See section on running client-server above for more detials.
         /numand     # server 
         /numan      # command line client 
     /internal 
-        /app #core application 
+        /app        #core application 
         /cmdcli     # simple cli helper lib 
         /datastore    # db storage (sqlite in this case)
     /scripts        # external scripts 
-
-#Not implemented but may be added 
     /api
         /grpc       # gRPC protobuff def & generated files 
+    /examples       # example installation
+#Not implemented but may be added later
     /vendor #Application dependencies (go mod controls this)
     /configs #default configs.
     /init #System init (systemd, upstart, sysv)
