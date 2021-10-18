@@ -34,7 +34,7 @@ type client struct {
 var conf struct {
 	Dsn           string
 	ServerAddress string `envconfig:"optional"` //if ommitted works in standalone mode
-	TlsCert       string
+	TlsCert       string `envconfig:"optional"` //if ommitted trusted Certificate Authority is needed
 	TokenFile     string `envconfig:"default=.numan_auth, optional"`
 	User          string
 	Password      string
@@ -55,7 +55,16 @@ func main() {
 		c.history = app.NewHistoryService(store)
 		c.user = app.NewUserService(store)
 	} else { //via gRPC
-		creds := credentials.NewTLS(&tls.Config{})
+		var creds credentials.TransportCredentials
+		if conf.TlsCert == "" { //Using trusted CA, no need to load client cert
+			creds = credentials.NewTLS(&tls.Config{})
+		} else { //use self-signed cert
+			var err error
+			creds, err = credentials.NewClientTLSFromFile(conf.TlsCert, "")
+			if err != nil {
+				log.Fatalf("cert load error: %s", err)
+			}
+		}
 		grpcClient := grpc.NewGrpcClient(conf.ServerAddress, creds)
 		c.numbering = grpc.NewNumberingClientAdapter(grpcClient)
 		//		c.history = grpc.NewHistoryClientAdapter(grpcClient)

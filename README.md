@@ -1,10 +1,10 @@
 # numan - a phone number management tool 
 
-This is an example Go project. It's a simple command line tool to keep track of phone number allocations. 
+This is an example Go project. It's a simple command line tool and gRPC API to keep track of phone number allocations/reservations stored in an sqlite db. 
 
-It's a learning project. The main purpose is to:
+It's a personal learning project (to replace an excel file). The main purpose is to:
 - explore suitable Go project layout. 
-- explore using gRPC with REST endpoint. 
+- explore using gRPC (and perhaps extending to expose gRPC via REST ). 
 
 The project loosely uses domain driven design and the  [standard Go project layout](https://github.com/golang-standards/project-layout). The main business objects being a 'numbering' record and a change 'history'. 
 The business objects are defined in root, then object logic is 'layered' using the root interface (I guess you could call this Go's version of method overloading ). 
@@ -23,7 +23,6 @@ This pattern allows for:
 ## TODO
 - improve error handling 
 - expand tests 
-- client config file 
 - setup command user roles 
 - number history 
 - memory store for user auth
@@ -31,10 +30,8 @@ This pattern allows for:
 - add/remove call for users 
 - add/remove users command 
 
-
-
 ## Installation
-This installation uses go modules so does not need to be in your $GOPATH (of course you will need go installed to compile)
+This installation uses Go modules so should not installed in your $GOPATH (of course you will need Go installed to compile)
 
 ```
 $ git clone https://github.com/footfish/numan
@@ -42,36 +39,85 @@ $ cd numan
 $ go install ./cmd/...
  
 ```
-## Running 
+Two binaries are installed 
+*  numan (client or standalone)
+*  numand (server)
 
-### Server 
+## Configuration 
+Configuration is from environmental variables. 
+These can be loaded from files or set on the terminal. 
+Check ./examples folder for list (*.env files).
 
+## Running Standalone Mode
 
-Try example: 
+numan can be run as standalone or as client/server(gRPC).
+To run as standalone application make sure the env SERVER_ADDRESS is NOT configured.
+
+Try the example: 
 ```
-#Use example files 
-$ cd example 
+$ cd examples                   # contains sample config and db. 
 
-$ $GOPATH/bin/numand &      
+$ vi numan.env                  # remove/comment line SERVER_ADDRESS
+
+$ numan                         # prints the command help 
+General Usage:-
+        command <param1> [param2] [..]. 
+                Syntax: <mandatory> , [optional]
+
+# Sample usage (see /scripts folder for more examples)
+$ numan summary                 # prints a summary of the example database 
+$ numan list 353-01             # prints details of numbers starting 353-01
+$ numan view 353-01-12345111    # view all details for numer 353-01-12345111
+
+```
+### Running Client-Server Mode
+
+To run in client-server mode you will need to use certificates. 
+There are two approaches you can use. 
+ 1) Use a self-signed cert. This approach requires the cert to be loaded in the client (or switch off verification). 
+ 2) Use your own trusted CA with minica (preferred). This approach does NOT require the cert to be loaded in the client but it a little trickier to set up. 
+
+ The example uses a self-signed cert. For help installing your own certs - see [/scripts/gen_certs.sh](./scripts/gen_certs.sh)
+
+Try the example:  
+``` 
+$ cd examples 
+$ numand &          # Start the server
+Starting gRPC user service on [::]:50051...
+
+$ numan             # Run the client 
+General Usage:-
+        command <param1> [param2] [..]. 
+                Syntax: <mandatory> , [optional]
+
+# Sample usage (see /scripts folder for more examples)
+$ numan summary                 # prints a summary of the example database 
+$ numan list 353-01             # prints details of numbers starting 353-01
+$ numan view 353-01-12345111    # view all details for numer 353-01-12345111
 ```
 
-Alternatively:
-* Install certs - see [/scripts/gen_certs.sh](./scripts/gen_certs.sh)
-* Set environmental vars in file _numand.env_ ([example numand.env](./examples/numand.env))
 
+
+### Problems
+
+#### 1. You get unusual characters in command printout (as shown below).
+A terminal which supports ANSI colors is required. If the command printout looks something like below, then your terminal is not supporting ANSI colours/escape sequences correctly. 
 ```
-$ $GOPATH/bin/numand &      
+←[97;40m
+General Usage:-←[0m
+......
 ```
+#### 2. MessageI 'Failed to load required environmental variables for config'.
+You need to set environmental variables or read from a file. See examples folder. 
+
+#### 3. Message: 'Authentication error x509: certificate signed by unknown authority"
+Check the config environmental variable TLS_CERT. If using a self-signed cert then this must be set. 
+See section on running client-server above for more detials.
 
 
-### Client 
 
-`$ export RPC_ADDRESS=localhost:50051 #set RPC address to use gRPC` 
-
-`$ $GOPATH/bin/numan          #run cli`
-
-
-## General Application Requirments 
+## General Application Requirements 
+- remote API & command interface
 - role based authentication
 - able to reserve/hold numbers (time)
 - limit numbers to a particular url domain
@@ -121,6 +167,9 @@ No external API's at this time.
 public facing API could show free numbers for example. 
 would require locking mechanism for reservation
 would require prevention of 'mass booking', perhaps client lock. 
+
+## Useful Links
+Sqlite command line tools - https://www.sqlite.org/cli.html
 
 ## Useful References
 
