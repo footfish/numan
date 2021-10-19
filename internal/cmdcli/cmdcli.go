@@ -24,8 +24,10 @@ package cmdcli
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"time"
 
@@ -128,12 +130,26 @@ func (c CommandConfigs) command(command string) CommandConfig {
 //printHelp prints usage & help for all commands
 func (c CommandConfigs) printHelp() {
 	color.Light.Println("\nGeneral Usage:-")
-	color.Info.Println("\tcommand <param1> [param2] [..]. ")
+	color.Info.Println("\tnuman command <param1> [param2] [..]. ")
 	color.Note.Println("\t\tSyntax: <mandatory> , [optional] ")
 	color.Light.Println("\nSupported Commands:-")
-	for k, cmd := range c {
-		cmd.printUsage(k)
+	color.Info.Print("\t")
+
+	keys := make([]string, 0, len(c)) // alphabetise command list
+	for k := range c {
+		keys = append(keys, k)
 	}
+	sort.Strings(keys)
+
+	first := true
+	for _, k := range keys { // print comma separated command list
+		if !first {
+			color.Info.Print(", ")
+		}
+		color.Info.Print(k)
+		first = false
+	}
+	fmt.Println("\n ")
 }
 
 //parameter is getter for parameterConfig

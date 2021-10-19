@@ -17,7 +17,7 @@ import (
 func main() {
 	var conf struct {
 		Dsn     string
-		Port    int `envconfig:"default=50051,optional"`
+		Port    int `envconfig:"default=50051"`
 		TlsCert string
 		TlsKey  string
 	}
