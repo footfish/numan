@@ -7,7 +7,7 @@ import (
 	"net"
 
 	"github.com/footfish/numan/api/grpc"
-	"github.com/footfish/numan/internal/datastore"
+	"github.com/footfish/numan/internal/app/datastore"
 	"github.com/joho/godotenv"
 	"github.com/vrischmann/envconfig"
 	"google.golang.org/grpc/credentials"

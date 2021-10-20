@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/footfish/numan"
-	"github.com/footfish/numan/internal/datastore"
+	"github.com/footfish/numan/internal/app/datastore"
 )
 
 // historyService implements the HistoryService interface

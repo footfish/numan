@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/footfish/numan"
-	"github.com/footfish/numan/internal/datastore"
+	"github.com/footfish/numan/internal/app/datastore"
 )
 
 // numberingService implements the NumberingService interface

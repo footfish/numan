@@ -2,6 +2,14 @@
 
 This is an example Go project. It's a simple command line tool to keep track of phone number allocations/reservations (for a service provider). It's implemented as a gRPC microservice. Data is stored in an sqlite db. 
 
+```
+General Usage:-
+        numan command <param1> [param2] [..]. 
+                Syntax: <mandatory> , [optional] 
+
+Example:-
+        numan view 353-01-12345111    # view details for phone number 353-01-12345111
+```
 It's a personal learning project (to replace an excel file). The main purpose is to:
 - explore suitable Go project layout. 
 - explore using gRPC (and perhaps extending to expose gRPC via REST ). 
@@ -9,18 +17,89 @@ It's a personal learning project (to replace an excel file). The main purpose is
 The project loosely uses [DDD (domain driven design)](https://en.wikipedia.org/wiki/Domain-driven_design) and the  [standard Go project layout](https://github.com/golang-standards/project-layout). 
 
 DDD's main principle is that classes should match the business domain. In this case the main _business objects_ being a 'numbering' record and a change 'history'. 
-For this project the _business objects_ are defined in root, then object logic is 'layered' using the root interface (I guess you could call this Go's version of method overloading ). 
+
+For this project the _business objects_ (history, numbering, user) are defined as an interface in the root folder (history.go, numbering.go, user.go), then object logic is 'layered' in the app directory (I guess you could call this Go's version of method overloading ). 
 
 To demonstrate using an example from the project folders. 
 
 - 'numbering' is a _business object_ 
 - /numbering.go <- this defines the _business object API_ ie. interface and structs  
-- /internal/app/numbering.go <- this implements the number interface to the overall application 
-- /internal/datastore/numbering.go <- this implements the number interface to storage 
+- /internal/app/numbering.go <- this implements the numbering interface to the core application 
+- /internal/app/datastore/numbering.go <- this implements the numbering storage layer
 
 This pattern allows for: 
 - Easily changing/adding new layers. For example swapping to a different storage mechanism. 
 - Avoids circular dependencies (which go does not allow). 
+
+
+
+## Installation
+This installation uses Go modules so should not installed in your $GOPATH (of course you will need Go installed to compile)
+
+```
+$ git clone https://github.com/footfish/numan
+$ cd numan
+$ go install ./cmd/...
+ 
+```
+Two binaries are installed 
+*  numan (client or standalone)
+*  numand (server)
+
+## Configuration 
+Configuration is from environmental variables. 
+These can be loaded from files or set on the terminal. 
+Check ./examples folder for list (*.env files).
+
+## Running Standalone Mode
+
+numan can be run as standalone or as client/server(gRPC).
+To run as standalone application make sure the env SERVER_ADDRESS is NOT configured.
+
+Try the example: 
+```
+$ cd examples                   # contains sample config and db. 
+
+$ vi numan.env                  # remove/comment line SERVER_ADDRESS
+
+$ numan                         # prints the command help 
+General Usage:-
+        command <param1> [param2] [..]. 
+                Syntax: <mandatory> , [optional]
+
+# Sample usage (see /scripts folder for more examples)
+$ numan summary                 # prints a summary of the example database 
+$ numan list 353-01             # prints details of numbers starting 353-01
+$ numan view 353-01-12345111    # view all details for number 353-01-12345111
+
+```
+### Running Client-Server Mode
+
+To run in client-server mode you will need to use certificates. 
+There are two approaches you can use. 
+ 1) Use a self-signed cert. This approach requires the cert to be loaded in the client (or switch off verification). 
+ 2) Use your own trusted CA with minica (preferred). This approach does NOT require the cert to be loaded in the client but it a little trickier to set up. 
+
+ The example uses a self-signed cert. For help installing your own certs - see [/scripts/gen_certs.sh](./scripts/gen_certs.sh)
+
+The client requires authentication. The username/password 
+
+Try the example:  
+``` 
+$ cd examples 
+$ numand &          # Start the server
+Starting gRPC user service on [::]:50051...
+
+$ numan             # Run the client 
+General Usage:-
+        command <param1> [param2] [..]. 
+                Syntax: <mandatory> , [optional]
+
+# Sample usage (see /scripts folder for more examples)
+$ numan summary                 # prints a summary of the example database 
+$ numan list 353-01             # prints details of numbers starting 353-01
+$ numan view 353-01-12345111    # view all details for numer 353-01-12345111
+```
 
 ## Usage 
 
@@ -69,74 +148,6 @@ Supported Commands:-
 ```  
 
 
-## Installation
-This installation uses Go modules so should not installed in your $GOPATH (of course you will need Go installed to compile)
-
-```
-$ git clone https://github.com/footfish/numan
-$ cd numan
-$ go install ./cmd/...
- 
-```
-Two binaries are installed 
-*  numan (client or standalone)
-*  numand (server)
-
-## Configuration 
-Configuration is from environmental variables. 
-These can be loaded from files or set on the terminal. 
-Check ./examples folder for list (*.env files).
-
-## Running Standalone Mode
-
-numan can be run as standalone or as client/server(gRPC).
-To run as standalone application make sure the env SERVER_ADDRESS is NOT configured.
-
-Try the example: 
-```
-$ cd examples                   # contains sample config and db. 
-
-$ vi numan.env                  # remove/comment line SERVER_ADDRESS
-
-$ numan                         # prints the command help 
-General Usage:-
-        command <param1> [param2] [..]. 
-                Syntax: <mandatory> , [optional]
-
-# Sample usage (see /scripts folder for more examples)
-$ numan summary                 # prints a summary of the example database 
-$ numan list 353-01             # prints details of numbers starting 353-01
-$ numan view 353-01-12345111    # view all details for numer 353-01-12345111
-
-```
-### Running Client-Server Mode
-
-To run in client-server mode you will need to use certificates. 
-There are two approaches you can use. 
- 1) Use a self-signed cert. This approach requires the cert to be loaded in the client (or switch off verification). 
- 2) Use your own trusted CA with minica (preferred). This approach does NOT require the cert to be loaded in the client but it a little trickier to set up. 
-
- The example uses a self-signed cert. For help installing your own certs - see [/scripts/gen_certs.sh](./scripts/gen_certs.sh)
-
-Try the example:  
-``` 
-$ cd examples 
-$ numand &          # Start the server
-Starting gRPC user service on [::]:50051...
-
-$ numan             # Run the client 
-General Usage:-
-        command <param1> [param2] [..]. 
-                Syntax: <mandatory> , [optional]
-
-# Sample usage (see /scripts folder for more examples)
-$ numan summary                 # prints a summary of the example database 
-$ numan list 353-01             # prints details of numbers starting 353-01
-$ numan view 353-01-12345111    # view all details for numer 353-01-12345111
-```
-
-
-
 ### Runtime Problems
 
 #### 1. You get unusual characters in command printout (as shown below).
@@ -165,16 +176,16 @@ See section on running client-server above for more detials.
 - load in batches / individually 
 - remove numbers 
 - log number history 
-- lo
-g user history (who/what cancelled & when) 
+- log user history (who/what cancelled & when) 
 - number search with wild card. 
 - single user per number 
 - log of porting 
 
 ## TODO
+- exend auth to all methods
 - improve error handling 
 - expand tests 
-- setup command user roles 
+- add command user roles 
 - number history 
 - memory store for user auth
 - sanity check/verification of user/pass 
@@ -188,10 +199,10 @@ g user history (who/what cancelled & when)
         /numand     # server 
         /numan      # command line client 
     /internal 
-        /app        #core application 
+        /app        # core application 
+                /datastore    # db storage (sqlite in this case)
         /cmdcli     # simple cli helper lib 
-        /datastore    # db storage (sqlite in this case)
-    /scripts        # external scripts 
+     /scripts        # external scripts 
     /api
         /grpc       # gRPC protobuff def & generated files 
     /examples       # example installation
@@ -207,7 +218,22 @@ g user history (who/what cancelled & when)
 ## API 
 
 ### internal 
-TODO
+Once numand is installed you can explore the api with [grpcurl]( https://github.com/fullstorydev/grpcurl
+) (uses reflection)
+```
+# All services (-insecure required if using CA is not recognised)
+grpcurl -insecure localhost:50051 describe
+
+#or specific service 
+grpcurl -insecure localhost:50051 describe grpc.Numbering
+
+#or method
+grpcurl -insecure localhost:50051 describe grpc.Numbering.Add
+
+#or message 
+grpcurl -insecure localhost:50051 describe grpc.AddRequest
+```
+
 
 ### external 
 No external API's at this time. 
@@ -217,15 +243,17 @@ would require prevention of 'mass booking', perhaps client lock.
 
 ## Useful Links
 Sqlite command line tools - https://www.sqlite.org/cli.html
+grpcurl - https://github.com/fullstorydev/grpcurl
 
 ## Useful References
 
-https://grpc.io/docs/languages/go/
-https://developers.google.com/protocol-buffers
-https://github.com/golang-standards/project-layout
-https://github.com/neocortical/mysvc
-https://github.com/benbjohnson/wtf/tree/daadc79f3778fd49db6e4064878030487e2e2a47
-https://medium.com/@nate510/structuring-go-grpc-microservices-dd176fdf28d0
-https://medium.com/@amsokol.com/tutorial-how-to-develop-go-grpc-microservice-with-http-rest-endpoint-middleware-kubernetes-daebb36a97e9
+* https://grpc.io/docs/languages/go/
+* https://developers.google.com/protocol-buffers
+* https://github.com/golang-standards/project-layout
+* https://github.com/neocortical/mysvc
+* https://github.com/benbjohnson/wtf/tree/daadc79f3778fd49db6e4064878030487e2e2a47
+* https://dev.to/techschoolguru/use-grpc-interceptor-for-authorization-with-jwt-1c5h
+* https://medium.com/@nate510/structuring-go-grpc-microservices-dd176fdf28d0
+* https://medium.com/@amsokol.com/tutorial-how-to-develop-go-grpc-microservice-with-http-rest-endpoint-middleware-kubernetes-daebb36a97e9
 
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/footfish/numan"
 	"github.com/footfish/numan/internal/app"
-	"github.com/footfish/numan/internal/datastore"
+	"github.com/footfish/numan/internal/app/datastore"
 	"google.golang.org/grpc"
 )
 
