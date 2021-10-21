@@ -24,9 +24,9 @@ type NumberingClient interface {
 	AddGroup(ctx context.Context, in *AddGroupRequest, opts ...grpc.CallOption) (*AddGroupResponse, error)
 	//List returns a filtered list of numbers
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
-	//ListUserID gets list of numbers attached to specific UserID
-	ListUserID(ctx context.Context, in *ListUserIDRequest, opts ...grpc.CallOption) (*ListUserIDResponse, error)
-	//Reserve locks a number to a UserID until untilTS (unix timestamp)
+	//ListOwnerID gets list of numbers attached to specific OwnerID
+	ListOwnerID(ctx context.Context, in *ListOwnerIDRequest, opts ...grpc.CallOption) (*ListOwnerIDResponse, error)
+	//Reserve locks a number to a OwnerID until untilTS (unix timestamp)
 	Reserve(ctx context.Context, in *ReserveRequest, opts ...grpc.CallOption) (*ReserveResponse, error)
 	//Allocate marks a number 'used' by a
 	Allocate(ctx context.Context, in *AllocateRequest, opts ...grpc.CallOption) (*AllocateResponse, error)
@@ -79,9 +79,9 @@ func (c *numberingClient) List(ctx context.Context, in *ListRequest, opts ...grp
 	return out, nil
 }
 
-func (c *numberingClient) ListUserID(ctx context.Context, in *ListUserIDRequest, opts ...grpc.CallOption) (*ListUserIDResponse, error) {
-	out := new(ListUserIDResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Numbering/ListUserID", in, out, opts...)
+func (c *numberingClient) ListOwnerID(ctx context.Context, in *ListOwnerIDRequest, opts ...grpc.CallOption) (*ListOwnerIDResponse, error) {
+	out := new(ListOwnerIDResponse)
+	err := c.cc.Invoke(ctx, "/grpc.Numbering/ListOwnerID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -170,9 +170,9 @@ type NumberingServer interface {
 	AddGroup(context.Context, *AddGroupRequest) (*AddGroupResponse, error)
 	//List returns a filtered list of numbers
 	List(context.Context, *ListRequest) (*ListResponse, error)
-	//ListUserID gets list of numbers attached to specific UserID
-	ListUserID(context.Context, *ListUserIDRequest) (*ListUserIDResponse, error)
-	//Reserve locks a number to a UserID until untilTS (unix timestamp)
+	//ListOwnerID gets list of numbers attached to specific OwnerID
+	ListOwnerID(context.Context, *ListOwnerIDRequest) (*ListOwnerIDResponse, error)
+	//Reserve locks a number to a OwnerID until untilTS (unix timestamp)
 	Reserve(context.Context, *ReserveRequest) (*ReserveResponse, error)
 	//Allocate marks a number 'used' by a
 	Allocate(context.Context, *AllocateRequest) (*AllocateResponse, error)
@@ -204,8 +204,8 @@ func (UnimplementedNumberingServer) AddGroup(context.Context, *AddGroupRequest) 
 func (UnimplementedNumberingServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedNumberingServer) ListUserID(context.Context, *ListUserIDRequest) (*ListUserIDResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListUserID not implemented")
+func (UnimplementedNumberingServer) ListOwnerID(context.Context, *ListOwnerIDRequest) (*ListOwnerIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOwnerID not implemented")
 }
 func (UnimplementedNumberingServer) Reserve(context.Context, *ReserveRequest) (*ReserveResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Reserve not implemented")
@@ -298,20 +298,20 @@ func _Numbering_List_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Numbering_ListUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListUserIDRequest)
+func _Numbering_ListOwnerID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOwnerIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NumberingServer).ListUserID(ctx, in)
+		return srv.(NumberingServer).ListOwnerID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Numbering/ListUserID",
+		FullMethod: "/grpc.Numbering/ListOwnerID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NumberingServer).ListUserID(ctx, req.(*ListUserIDRequest))
+		return srv.(NumberingServer).ListOwnerID(ctx, req.(*ListOwnerIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -480,8 +480,8 @@ var Numbering_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Numbering_List_Handler,
 		},
 		{
-			MethodName: "ListUserID",
-			Handler:    _Numbering_ListUserID_Handler,
+			MethodName: "ListOwnerID",
+			Handler:    _Numbering_ListOwnerID_Handler,
 		},
 		{
 			MethodName: "Reserve",

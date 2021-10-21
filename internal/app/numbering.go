@@ -55,9 +55,9 @@ func (s *numberingService) List(ctx context.Context, filter *numan.NumberFilter)
 	return filtered, nil
 }
 
-//ListUserID implements NumberingService.ListUserID()
-func (s *numberingService) ListUserID(ctx context.Context, uid int64) ([]numan.Numbering, error) {
-	return s.next.ListUserID(ctx, uid)
+//ListOwnerID implements NumberingService.ListOwnerID()
+func (s *numberingService) ListOwnerID(ctx context.Context, oid int64) ([]numan.Numbering, error) {
+	return s.next.ListOwnerID(ctx, oid)
 }
 
 //Summary implements NumberingService.Summary()
@@ -91,7 +91,7 @@ func (s *numberingService) View(ctx context.Context, number *numan.E164) (string
 }
 
 //Reserve implements NumberingService.Reserve()
-func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, userID *int64, untilTS *int64) error {
+func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, ownerID *int64, untilTS *int64) error {
 	if number == nil {
 		return errors.New("nil pointer")
 	}
@@ -102,25 +102,25 @@ func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, user
 	if err := number.ValidE164(); err != nil {
 		return errors.New("Can't reserve number, " + err.Error())
 	}
-	if err := numan.ValidUserID(userID); err != nil {
+	if err := numan.ValidOwnerID(ownerID); err != nil {
 		return errors.New("Can't reserve number, " + err.Error())
 	}
-	return s.next.Reserve(ctx, number, userID, untilTS)
+	return s.next.Reserve(ctx, number, ownerID, untilTS)
 }
 
 //Allocate implements NumberingService.Allocate()
-func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, userID *int64) error {
-	if number == nil || userID == nil {
+func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, ownerID *int64) error {
+	if number == nil || ownerID == nil {
 		return errors.New("nil pointer")
 	}
 
 	if err := number.ValidE164(); err != nil {
 		return errors.New("Can't allocate number, " + err.Error())
 	}
-	if err := numan.ValidUserID(userID); err != nil {
+	if err := numan.ValidOwnerID(ownerID); err != nil {
 		return errors.New("Can't allocate number, " + err.Error())
 	}
-	return s.next.Allocate(ctx, number, userID)
+	return s.next.Allocate(ctx, number, ownerID)
 }
 
 //DeAllocate implements NumberingService.DeAllocate()

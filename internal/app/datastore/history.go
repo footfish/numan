@@ -23,7 +23,7 @@ func (s *historyService) GetHistoryByNumber(ctx context.Context, phoneNumber num
 	return
 }
 
-//GetHistoryByUserID implements HistoryService.GetHistoryByUserId()
-func (s *historyService) GetHistoryByUserID(ctx context.Context, userID int64) (history []numan.History, err error) {
+//GetHistoryByOwnerID implements HistoryService.GetHistoryByUserId()
+func (s *historyService) GetHistoryByOwnerID(ctx context.Context, ownerID int64) (history []numan.History, err error) {
 	return
 }

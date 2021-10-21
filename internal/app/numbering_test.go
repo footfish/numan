@@ -78,8 +78,8 @@ func TestReserve(t *testing.T) {
 		}
 		//Reserve
 		untilTS := time.Now().Unix() + (60 * 15) //15mins
-		userID := int64(99)
-		if err := nu.Reserve(ctx, &validPhoneNumbers[0], &userID, &untilTS); err != nil {
+		ownerID := int64(99)
+		if err := nu.Reserve(ctx, &validPhoneNumbers[0], &ownerID, &untilTS); err != nil {
 			t.Fatal(err)
 		}
 		//Read & check
@@ -108,14 +108,14 @@ func TestListUserId(t *testing.T) {
 		}
 		//Reserve
 		untilTS := time.Now().Unix() + (60 * 15) //15mins
-		userID := int64(99)
+		ownerID := int64(99)
 		for i := 0; i < 2; i++ {
-			if err := nu.Reserve(ctx, &validPhoneNumbers[i], &userID, &untilTS); err != nil {
+			if err := nu.Reserve(ctx, &validPhoneNumbers[i], &ownerID, &untilTS); err != nil {
 				t.Fatal(err)
 			}
 		}
 		//Read & check
-		if storedNumber, err := nu.ListUserID(ctx, userID); err != nil {
+		if storedNumber, err := nu.ListOwnerID(ctx, ownerID); err != nil {
 			t.Fatal(err)
 		} else if want, got := 2, len(storedNumber); want != got { //Cc
 			t.Fatalf("ListUserId got %v, want %v", got, want)
@@ -149,7 +149,7 @@ func TestAdd(t *testing.T) {
 			t.Fatalf("got %v, want %v", got, want)
 		} else if want, got := "anycarrier", storedNumber[0].Carrier; want != got { //Carrier
 			t.Fatalf("got %v, want %v", got, want)
-		} else if want, got := int64(0), storedNumber[0].UserID; want != got { //UserID
+		} else if want, got := int64(0), storedNumber[0].OwnerID; want != got { //OwnerID
 			t.Fatalf("UserId got %v, want %v", got, want)
 		} else if want, got := false, storedNumber[0].Used; want != got { //Used
 			t.Fatalf("Used got %v, want %v", got, want)

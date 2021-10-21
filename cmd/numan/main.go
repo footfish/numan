@@ -127,9 +127,9 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^([1-9]\d{0,2}\-[01]\d{0,4}\-\d{0,13})|([1-9]\d{0,2}\-[01]\d{0,4})$`)
 	cmd.NewStringParameter("domain", false)
 
-	cmdDescription = "Lists numbers for a user"
-	cmd = cli.NewCommand("list_user", c.listUser, cmdDescription)
-	cmd.NewIntParameter("uid", true)
+	cmdDescription = "Lists numbers attached to owner"
+	cmd = cli.NewCommand("list_owner", c.listOwner, cmdDescription)
+	cmd.NewIntParameter("oid", true)
 
 	cmdDescription = "Views all details and history for number entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted  "
 	cmd = cli.NewCommand("view", c.view, cmdDescription)
@@ -139,10 +139,10 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmd = cli.NewCommand("delete", c.delete, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 
-	cmdDescription = "Reserves a number for a user for a number of minutes"
+	cmdDescription = "Reserves a number for an owner for a number of minutes"
 	cmd = cli.NewCommand("reserve", c.reserve, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
-	cmd.NewIntParameter("uid", true)
+	cmd.NewIntParameter("oid", true)
 	cmd.NewIntParameter("minutes", true).SetRegexp("^[0-9]{1,2}$")
 
 	cmdDescription = "Sets a porting out date (dd/mm/yy)"
@@ -155,12 +155,12 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 	cmd.NewDateParameter("date", true)
 
-	cmdDescription = "Allocates a number to a user"
+	cmdDescription = "Allocates a number to an owner"
 	cmd = cli.NewCommand("allocate", c.allocate, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
-	cmd.NewIntParameter("uid", true)
+	cmd.NewIntParameter("oid", true)
 
-	cmdDescription = "De-allocates a number from a user"
+	cmdDescription = "De-allocates a number from an owner"
 	cmd = cli.NewCommand("deallocate", c.deallocate, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 
@@ -325,17 +325,17 @@ func (c *client) delete(p cmdcli.RxParameters) {
 	}
 }
 
-//reserve <phonenumber> <userid> <minutes>
+//reserve <phonenumber> <oid> <minutes>
 func (c *client) reserve(p cmdcli.RxParameters) {
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
 	number := numan.E164{
 		Cc:  splitNumber[0],
 		Ndc: splitNumber[1],
 		Sn:  splitNumber[2]}
-	userID := p["uid"].(int64)
+	ownerID := p["oid"].(int64)
 	untilTS := time.Now().Unix() + 60*p["minutes"].(int64)
 
-	if err := c.numbering.Reserve(c.ctx, &number, &userID, &untilTS); err != nil {
+	if err := c.numbering.Reserve(c.ctx, &number, &ownerID, &untilTS); err != nil {
 		color.Warn.Println(err)
 		if numberDetails, err := c.numbering.View(c.ctx, &number); err != nil {
 			color.Warn.Println(err)
@@ -349,16 +349,16 @@ func (c *client) reserve(p cmdcli.RxParameters) {
 	}
 }
 
-//allocate <phonenumber> <uid>
+//allocate <phonenumber> <oid>
 func (c *client) allocate(p cmdcli.RxParameters) {
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
 	number := numan.E164{
 		Cc:  splitNumber[0],
 		Ndc: splitNumber[1],
 		Sn:  splitNumber[2]}
-	userID := p["uid"].(int64)
+	ownerID := p["oid"].(int64)
 
-	if err := c.numbering.Allocate(c.ctx, &number, &userID); err != nil {
+	if err := c.numbering.Allocate(c.ctx, &number, &ownerID); err != nil {
 		color.Warn.Println(err)
 		if numberDetails, err := c.numbering.View(c.ctx, &number); err != nil {
 			color.Warn.Println(err)
@@ -394,11 +394,11 @@ func (c *client) deallocate(p cmdcli.RxParameters) {
 	}
 }
 
-//	list_user <uid>
-func (c *client) listUser(p cmdcli.RxParameters) {
-	userID := p["uid"].(int64)
+//	list_owner <oid>
+func (c *client) listOwner(p cmdcli.RxParameters) {
+	ownerID := p["oid"].(int64)
 
-	if numberList, err := c.numbering.ListUserID(c.ctx, userID); err != nil {
+	if numberList, err := c.numbering.ListOwnerID(c.ctx, ownerID); err != nil {
 		color.Warn.Println(err)
 		os.Exit(1)
 	} else {
@@ -415,7 +415,7 @@ func printNumberList(numberList []numan.Numbering) {
 		Number      string `header:"Number"`
 		Domain      string `header:"Domain"`
 		Carrier     string `header:"Carrier"`
-		UserID      int64  `header:"User"`
+		OwnerID     int64  `header:"Owner"`
 		Used        bool   `header:"Used"`
 		Allocated   string `header:"Allocated"`
 		Reserved    string `header:"Reserved"`
@@ -439,7 +439,7 @@ func printNumberList(numberList []numan.Numbering) {
 
 	for _, n := range numberList {
 		table = append(table, tableRow{ID: n.ID,
-			UserID:      n.UserID,
+			OwnerID:     n.OwnerID,
 			Domain:      n.Domain,
 			Carrier:     n.Carrier,
 			Number:      fmt.Sprintf("%v-%v-%v", n.E164.Cc, n.E164.Ndc, n.E164.Sn),

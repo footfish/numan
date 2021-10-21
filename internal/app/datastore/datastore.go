@@ -28,7 +28,7 @@ func NewStore(dsn string) *Store {
 			used BOOLEAN NOT NULL DEFAULT 0, 
 			domain TEXT NOT NULL,
 			carrier TEXT NOT NULL,
-			userID  INTEGER NOT NULL DEFAULT 0, 
+			ownerID  INTEGER NOT NULL DEFAULT 0, 
 			allocated INTEGER NOT NULL DEFAULT 0, 
 			reserved  INTEGER NOT NULL DEFAULT 0, 
 			deallocated INTEGER NOT NULL DEFAULT 0, 

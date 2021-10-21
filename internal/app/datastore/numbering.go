@@ -54,8 +54,8 @@ func (s *numberingService) List(ctx context.Context, filter *numan.NumberFilter)
 	if v := filter.ID; v != 0 {
 		where, args = append(where, "id = ?"), append(args, v)
 	}
-	if v := filter.UserID; v != 0 {
-		where, args = append(where, "userID = ?"), append(args, v)
+	if v := filter.OwnerID; v != 0 {
+		where, args = append(where, "ownerID = ?"), append(args, v)
 	}
 	if v := filter.State; v != 0 {
 		where, args = append(where, "used = ?"), append(args, ((v-1) != 0)) // convert State->Used(bool)
@@ -82,7 +82,7 @@ func (s *numberingService) List(ctx context.Context, filter *numan.NumberFilter)
 			&result.Used,
 			&result.Domain,
 			&result.Carrier,
-			&result.UserID,
+			&result.OwnerID,
 			&result.Allocated,
 			&result.Reserved,
 			&result.DeAllocated,
@@ -101,9 +101,9 @@ func (s *numberingService) List(ctx context.Context, filter *numan.NumberFilter)
 	return resultList, nil
 }
 
-//ListUserID implements NumberingService.ListUserID()
-func (s *numberingService) ListUserID(ctx context.Context, uid int64) ([]numan.Numbering, error) {
-	filter := &numan.NumberFilter{UserID: uid}
+//ListOwnerID implements NumberingService.ListOwnerID()
+func (s *numberingService) ListOwnerID(ctx context.Context, oid int64) ([]numan.Numbering, error) {
+	filter := &numan.NumberFilter{OwnerID: oid}
 	return s.List(ctx, filter)
 }
 
@@ -167,7 +167,7 @@ func (s *numberingService) View(ctx context.Context, number *numan.E164) (view s
 		view += fmt.Sprintf("#%d) +%v-%v-%v, Domain: %v, Carrier: %v\n", r.ID, r.E164.Cc, r.E164.Ndc, r.E164.Sn, r.Domain, r.Carrier)
 		if r.Used { //Used can be reserved or allocated
 			if r.Allocated > 0 {
-				view += fmt.Sprintf("Allocated to UserID: %v on %v\n", r.UserID, time.Unix(int64(r.Allocated), 0).Format(numan.DATEPRINTFORMAT))
+				view += fmt.Sprintf("Allocated to OwnerID: %v on %v\n", r.OwnerID, time.Unix(int64(r.Allocated), 0).Format(numan.DATEPRINTFORMAT))
 			}
 			if r.Reserved > 0 {
 				view += fmt.Sprintf("Reserved %v\n", time.Unix(int64(r.Reserved), 0).Format(numan.DATEPRINTFORMAT))
@@ -190,10 +190,10 @@ func (s *numberingService) View(ctx context.Context, number *numan.E164) (view s
 }
 
 //Reserve implements NumberingService.Reserve()
-//Mark 'used' & set userID & reserved date.
+//Mark 'used' & set ownerID & reserved date.
 //Numbers must be out of quarantine
-func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, userID *int64, untilTS *int64) error {
-	row, err := s.store.db.Exec("UPDATE number set used=1, deallocated=0, reserved=?, userID=? where reserved==0 and used==0 and userID==0 and cc=? and ndc=? and sn=? and deallocated<?", *untilTS, *userID, number.Cc, number.Ndc, number.Sn, time.Now().Unix()-numan.QUARANTINE)
+func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, ownerID *int64, untilTS *int64) error {
+	row, err := s.store.db.Exec("UPDATE number set used=1, deallocated=0, reserved=?, ownerID=? where reserved==0 and used==0 and ownerID==0 and cc=? and ndc=? and sn=? and deallocated<?", *untilTS, *ownerID, number.Cc, number.Ndc, number.Sn, time.Now().Unix()-numan.QUARANTINE)
 	if err != nil {
 		return err
 	}
@@ -205,10 +205,10 @@ func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, user
 }
 
 //Allocate implements NumberingService.Allocate()
-//Mark 'used' & set userID & allocation date. Reset reservation & de-allocation flag
+//Mark 'used' & set ownerID & allocation date. Reset reservation & de-allocation flag
 //Numbers must be out of quarantine
-func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, userID *int64) error {
-	row, err := s.store.db.Exec("UPDATE number set used=1, deallocated=0, reserved=0, allocated=?, userID=? where used==0 and userID==0 and cc=? and ndc=? and sn=? and deallocated<?", time.Now().Unix(), *userID, number.Cc, number.Ndc, number.Sn, time.Now().Unix()-numan.QUARANTINE)
+func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, ownerID *int64) error {
+	row, err := s.store.db.Exec("UPDATE number set used=1, deallocated=0, reserved=0, allocated=?, ownerID=? where used==0 and ownerID==0 and cc=? and ndc=? and sn=? and deallocated<?", time.Now().Unix(), *ownerID, number.Cc, number.Ndc, number.Sn, time.Now().Unix()-numan.QUARANTINE)
 	if err != nil {
 		return err
 	}
@@ -220,9 +220,9 @@ func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, use
 }
 
 //DeAllocate implements NumberingService.DeAllocate()
-//Mark 'unused' & set de-allocation date (quarantine). Resets  userID, reservation & allocation dateflag.
+//Mark 'unused' & set de-allocation date (quarantine). Resets  ownerID, reservation & allocation dateflag.
 func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164) error {
-	row, err := s.store.db.Exec("UPDATE number set used=0, deallocated=?, reserved=0, allocated=0, userID=0 where used==1 and cc=? and ndc=? and sn=? and deallocated=0", time.Now().Unix(), number.Cc, number.Ndc, number.Sn)
+	row, err := s.store.db.Exec("UPDATE number set used=0, deallocated=?, reserved=0, allocated=0, ownerID=0 where used==1 and cc=? and ndc=? and sn=? and deallocated=0", time.Now().Unix(), number.Cc, number.Ndc, number.Sn)
 	if err != nil {
 		return err
 	}

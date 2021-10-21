@@ -55,9 +55,9 @@ func (c *numberingClientAdapter) List(ctx context.Context, filter *numan.NumberF
 	return
 }
 
-// ListUserID implements NumberingService.ListUserID()
-func (c *numberingClientAdapter) ListUserID(ctx context.Context, userID int64) (numbers []numan.Numbering, err error) {
-	numberList, err := c.numbering.ListUserID(ctx, &ListUserIDRequest{UserID: userID})
+// ListOwnerID implements NumberingService.ListOwnerID()
+func (c *numberingClientAdapter) ListOwnerID(ctx context.Context, ownerID int64) (numbers []numan.Numbering, err error) {
+	numberList, err := c.numbering.ListOwnerID(ctx, &ListOwnerIDRequest{OwnerID: ownerID})
 	if err == nil {
 		for _, number := range numberList.Number {
 			numbers = append(numbers, *unMarshalNumber(number))
@@ -67,14 +67,14 @@ func (c *numberingClientAdapter) ListUserID(ctx context.Context, userID int64) (
 }
 
 //Reserve implements NumberingService.Reserve()
-func (c *numberingClientAdapter) Reserve(ctx context.Context, number *numan.E164, userID *int64, untilTS *int64) error {
-	_, err := c.numbering.Reserve(ctx, &ReserveRequest{E164: marshalE164(number), UserID: *userID, UntilTS: *untilTS})
+func (c *numberingClientAdapter) Reserve(ctx context.Context, number *numan.E164, ownerID *int64, untilTS *int64) error {
+	_, err := c.numbering.Reserve(ctx, &ReserveRequest{E164: marshalE164(number), OwnerID: *ownerID, UntilTS: *untilTS})
 	return err
 }
 
 //Allocate implements NumberingService.Allocate()
-func (c *numberingClientAdapter) Allocate(ctx context.Context, number *numan.E164, userID *int64) error {
-	_, err := c.numbering.Allocate(ctx, &AllocateRequest{E164: marshalE164(number), UserID: *userID})
+func (c *numberingClientAdapter) Allocate(ctx context.Context, number *numan.E164, ownerID *int64) error {
+	_, err := c.numbering.Allocate(ctx, &AllocateRequest{E164: marshalE164(number), OwnerID: *ownerID})
 	return err
 }
 
@@ -126,8 +126,8 @@ func (c *numberingClientAdapter) GetHistoryByNumber(ctx context.Context, phoneNu
 	return
 }
 
-//GetHistoryByUserID implements HistoryAPI.GetHistoryByUserId()
-func (c *numberingClientAdapter) GetHistoryByUserID(ctx context.Context, userID int64) (history []numan.History, err error) {
+//GetHistoryByOwnerID implements HistoryAPI.GetHistoryByUserId()
+func (c *numberingClientAdapter) GetHistoryByOwnerID(ctx context.Context, ownerID int64) (history []numan.History, err error) {
 	return
 }
 
@@ -164,15 +164,15 @@ func (s *numberingServerAdapter) List(ctx context.Context, in *ListRequest) (*Li
 	return resp, err
 }
 
-//ListUserID implements NumberingServer.ListUserID()
-func (s *numberingServerAdapter) ListUserID(ctx context.Context, in *ListUserIDRequest) (*ListUserIDResponse, error) {
+//ListOwnerID implements NumberingServer.ListOwnerID()
+func (s *numberingServerAdapter) ListOwnerID(ctx context.Context, in *ListOwnerIDRequest) (*ListOwnerIDResponse, error) {
 
-	numberList, err := s.numbering.ListUserID(ctx, in.UserID)
+	numberList, err := s.numbering.ListOwnerID(ctx, in.OwnerID)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &ListUserIDResponse{}
+	resp := &ListOwnerIDResponse{}
 	for _, number := range numberList {
 		resp.Number = append(resp.Number, marshalNumber(&number))
 	}
@@ -181,13 +181,13 @@ func (s *numberingServerAdapter) ListUserID(ctx context.Context, in *ListUserIDR
 
 //Reserve implements NumberingServer.Reserve()
 func (s *numberingServerAdapter) Reserve(ctx context.Context, in *ReserveRequest) (*ReserveResponse, error) {
-	err := s.numbering.Reserve(ctx, unMarshalE164(in.E164), &in.UserID, &in.UntilTS)
+	err := s.numbering.Reserve(ctx, unMarshalE164(in.E164), &in.OwnerID, &in.UntilTS)
 	return &ReserveResponse{}, err
 }
 
 //Allocate  implements NumberingServer.Reserve()
 func (s *numberingServerAdapter) Allocate(ctx context.Context, in *AllocateRequest) (*AllocateResponse, error) {
-	err := s.numbering.Allocate(ctx, unMarshalE164(in.E164), &in.UserID)
+	err := s.numbering.Allocate(ctx, unMarshalE164(in.E164), &in.OwnerID)
 	return &AllocateResponse{}, err
 }
 
@@ -236,7 +236,7 @@ func marshalNumberFilter(n *numan.NumberFilter) *NumberFilter {
 		State:       int32(n.State),
 		Domain:      n.Domain,
 		Carrier:     n.Carrier,
-		UserID:      int64(n.UserID),
+		OwnerID:     int64(n.OwnerID),
 		Allocated:   n.Allocated,
 		Reserved:    n.Reserved,
 		DeAllocated: n.DeAllocated,
@@ -253,7 +253,7 @@ func unMarshalNumberFilter(n *NumberFilter) *numan.NumberFilter {
 		State:       byte(n.State),
 		Domain:      n.Domain,
 		Carrier:     n.Carrier,
-		UserID:      n.UserID,
+		OwnerID:     n.OwnerID,
 		Allocated:   n.Allocated,
 		Reserved:    n.Reserved,
 		DeAllocated: n.DeAllocated,
@@ -289,7 +289,7 @@ func marshalNumber(n *numan.Numbering) *Number {
 		Used:        n.Used,
 		Domain:      n.Domain,
 		Carrier:     n.Carrier,
-		UserID:      n.UserID,
+		OwnerID:     n.OwnerID,
 		Allocated:   n.Allocated,
 		DeAllocated: n.DeAllocated,
 		PortedIn:    n.PortedIn,
@@ -306,7 +306,7 @@ func unMarshalNumber(n *Number) *numan.Numbering {
 		Used:        n.Used,
 		Domain:      n.Domain,
 		Carrier:     n.Carrier,
-		UserID:      n.UserID,
+		OwnerID:     n.OwnerID,
 		Allocated:   n.Allocated,
 		DeAllocated: n.DeAllocated,
 		PortedIn:    n.PortedIn,

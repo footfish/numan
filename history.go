@@ -12,6 +12,6 @@ type History struct {
 type HistoryService interface {
 	//GetHistoryByNumber gets history for a specific phone number
 	GetHistoryByNumber(ctx context.Context, phoneNumber E164) ([]History, error)
-	//GetHistoryByUserID gets history for a specific UserID
-	GetHistoryByUserID(ctx context.Context, userID int64) ([]History, error)
+	//GetHistoryByOwnerID gets history for a specific OwnerID
+	GetHistoryByOwnerID(ctx context.Context, ownerID int64) ([]History, error)
 }

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS number (
 	used BOOLEAN NOT NULL DEFAULT 0, 
    	domain TEXT NOT NULL,
 	carrier TEXT NOT NULL,
-	userID  INTEGER NOT NULL DEFAULT 0, 
+	ownerID  INTEGER NOT NULL DEFAULT 0, 
 	allocated INTEGER NOT NULL DEFAULT 0, 
 	reserved  INTEGER NOT NULL DEFAULT 0, 
 	deallocated INTEGER NOT NULL DEFAULT 0, 
@@ -16,5 +16,5 @@ CREATE TABLE IF NOT EXISTS number (
 );
 
 INSERT into number (id, cc, ndc, sn, domain, carrier) values (1, "353" , "086", "0111111", "test.com","anycarrier");
-INSERT into number (id, cc, ndc, sn, domain, carrier, used, userID, allocated) values (2, "353" , "086", "0111112", "test.com","anycarrier", 1, 24, 1612564816);
+INSERT into number (id, cc, ndc, sn, domain, carrier, used, ownerID, allocated) values (2, "353" , "086", "0111112", "test.com","anycarrier", 1, 24, 1612564816);
 

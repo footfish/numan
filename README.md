@@ -31,10 +31,8 @@ This pattern allows for:
 - Easily changing/adding new layers. For example swapping to a different storage mechanism. 
 - Avoids circular dependencies (which go does not allow). 
 
-
-
 ## Installation
-This installation uses Go modules so should not installed in your $GOPATH (of course you will need Go installed to compile)
+This installation uses Go modules, so should not be installed in your $GOPATH (of course you will need Go installed to compile)
 
 ```
 $ git clone https://github.com/footfish/numan
@@ -121,20 +119,20 @@ Supported Commands:-
         view <phonenumber>
                 Views all details and history for number entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted
 
-        reserve <phonenumber> <uid> <minutes>
-                Reserves a number for a user for a number of minutes
+        reserve <phonenumber> <oid> <minutes>
+                Reserves a number for an owner for a number of minutes
 
         portout <phonenumber> <date>
                 Sets a porting out date (dd/mm/yy)
 
         deallocate <phonenumber>
-                De-allocates a number from a user
+                De-allocates a number from an owner
 
         list <phonenumber> [domain] 
                 Lists number db entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted
 
-        list_user <uid>
-                Lists numbers for a user
+        list_owner <oid>
+                  Lists numbers attached to owner
 
         delete <phonenumber>
                 Deletes a number permentantly (history retained)
@@ -142,8 +140,8 @@ Supported Commands:-
         portin <phonenumber> <date>
                 Sets a porting in date (dd/mm/yy)
 
-        allocate <phonenumber> <uid>
-                Allocates a number to a user
+        allocate <phonenumber> <oid>
+                Allocates a number to an owner
 
 ```  
 
@@ -166,20 +164,19 @@ See section on running client-server above for more detials.
 
 ## General Application Requirements 
 - remote API & command interface
-- role based authentication
+- client role based authentication
 - able to reserve/hold numbers (time)
-- limit numbers to a particular url domain
+- allocate/limit numbers to a particular url domain
 - select a list of random available numbers 
 - able to mark numbers used. tie to account & url domain 
 - have a period of quarantine when number is free  
 - see number block owner/provider 
 - load in batches / individually 
 - remove numbers 
-- log number history 
-- log user history (who/what cancelled & when) 
+- log all history (number/owner/user)
 - number search with wild card. 
-- single user per number 
-- log of porting 
+- single owner per number 
+
 
 ## TODO
 - exend auth to all methods

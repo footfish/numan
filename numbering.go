@@ -22,7 +22,7 @@ type Numbering struct {
 	Used        bool   // indicates number is actively being used or not (reserved, allocated).
 	Domain      string // which domain is using the number (which domain can allocate)
 	Carrier     string // who is the block owner
-	UserID      int64  // which client a/c is using
+	OwnerID     int64  // which client/customer currently 'owns' the number
 	Allocated   int64  // timestamp of when the number was allocated OR 0 if unused
 	Reserved    int64  // timestamp if the number is reserved OR 0
 	DeAllocated int64  // timestamp when number was last cancelled (use for quarantine) OR 0
@@ -44,7 +44,7 @@ type NumberFilter struct {
 	State       byte   // 0 - ignore, 1 - free, 2 - used
 	Domain      string // which domain is using the number (which domain can allocate)
 	Carrier     string // who is the block owner
-	UserID      int64  // which client a/c is using
+	OwnerID     int64  // which client a/c is using
 	Allocated   bool   // if the number was ordered
 	Reserved    bool   // if the number is reserved
 	DeAllocated bool   // if number was last cancelled (use for quarantine)
@@ -61,12 +61,12 @@ type NumberingService interface {
 	AddGroup(ctx context.Context)
 	//List returns a filtered list of numbers
 	List(ctx context.Context, filter *NumberFilter) ([]Numbering, error)
-	//ListUserID gets list of numbers attached to specific UserID
-	ListUserID(ctx context.Context, userID int64) ([]Numbering, error)
-	//Reserve locks a number to a UserID until untilTS (unix timestamp)
-	Reserve(ctx context.Context, number *E164, userID *int64, untilTS *int64) error
+	//ListOwnerID gets list of numbers attached to specific OwnerID
+	ListOwnerID(ctx context.Context, ownerID int64) ([]Numbering, error)
+	//Reserve locks a number to a OwnerID until untilTS (unix timestamp)
+	Reserve(ctx context.Context, number *E164, ownerID *int64, untilTS *int64) error
 	//Allocate marks a number 'used' by a User
-	Allocate(ctx context.Context, number *E164, userID *int64) error
+	Allocate(ctx context.Context, number *E164, ownerID *int64) error
 	//DeAllocate number from User (number goes to quarantine)
 	DeAllocate(ctx context.Context, number *E164) error
 	//Portout sets a port out date (just a log, doesn't care about state or do anything else)
@@ -95,9 +95,9 @@ func (phoneNumber E164) ValidE164() error {
 	return nil
 }
 
-//ValidUserID validates userid format.
-func ValidUserID(userID *int64) error {
-	if *userID == 0 {
+//ValidOwnerID validates ownerID format.
+func ValidOwnerID(ownerID *int64) error {
+	if *ownerID == 0 {
 		return errors.New("User id invalid")
 	}
 	return nil

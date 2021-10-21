@@ -10,9 +10,9 @@ service Numbering {
     rpc AddGroup(AddGroupRequest) returns (AddGroupResponse) {}
     //List returns a filtered list of numbers
     rpc List(ListRequest) returns (ListResponse) {}
-    //ListUserID gets list of numbers attached to specific UserID
-    rpc ListUserID(ListUserIDRequest) returns (ListUserIDResponse) {}
-    //Reserve locks a number to a UserID until untilTS (unix timestamp)
+    //ListOwnerID gets list of numbers attached to specific OwnerID
+    rpc ListOwnerID(ListOwnerIDRequest) returns (ListOwnerIDResponse) {}
+    //Reserve locks a number to a OwnerID until untilTS (unix timestamp)
     rpc Reserve(ReserveRequest) returns (ReserveResponse) {}
     //Allocate marks a number 'used' by a 
     rpc Allocate(AllocateRequest) returns (AllocateResponse) {}
@@ -49,17 +49,17 @@ message AddRequest {
     repeated Number number = 1;
   }
 
-  message ListUserIDRequest {
-     int64 userID = 1;
+  message ListOwnerIDRequest {
+     int64 ownerID = 1;
   }
 
-  message ListUserIDResponse {
+  message ListOwnerIDResponse {
     repeated Number number = 1;
   }
 
   message ReserveRequest {
      E164 e164 = 1;
-     int64 userID = 2;
+     int64 ownerID = 2;
      int64 untilTS = 3;
   }
 
@@ -68,7 +68,7 @@ message AddRequest {
 
   message AllocateRequest {
      E164 e164 = 1;
-     int64 userID = 2;
+     int64 ownerID = 2;
   }
 
   message AllocateResponse {
@@ -127,11 +127,11 @@ message AddRequest {
 
   message Number {
     int64 id = 1;
-     E164  e164 = 2;
+    E164  e164 = 2;
     bool used = 3;
     string domain = 4;
     string carrier = 5;
-    int64 userID = 6;
+    int64 ownerID = 6;
     int64 allocated = 7;
     int64 reserved = 8;  
     int64 deAllocated = 9;
@@ -145,7 +145,7 @@ message AddRequest {
     int32 state = 3;
     string domain = 4;
     string carrier = 5;
-    int64 userID = 6;
+    int64 ownerID = 6;
     bool allocated = 7;
     bool reserved = 8;  
     bool deAllocated = 9;
