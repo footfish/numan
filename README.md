@@ -10,19 +10,19 @@ General Usage:-
 Example:-
         numan view 353-01-12345111    # view details for phone number 353-01-12345111
 ```
-It's a personal learning project (to replace an excel file). The main purpose is to:
+It's a personal (learning) project (to replace an excel file). The main purpose is to:
 - explore suitable Go project layout. 
 - explore using gRPC (and perhaps extending to expose gRPC via REST ). 
 
 The project loosely uses [DDD (domain driven design)](https://en.wikipedia.org/wiki/Domain-driven_design) and the  [standard Go project layout](https://github.com/golang-standards/project-layout). 
 
-DDD's main principle is that classes should match the business domain. In this case the main _business objects_ being a 'numbering' record, a change 'history' log and the 'users'. 
+DDD's main principle is that classes should match the business domain. In this case the main _business objects_ being  a change 'history' log and the 'numbering' & 'user' records. 
 
-For this project the _business objects_ (history, numbering, user) are defined as an interface in the root folder (history.go, numbering.go, user.go), then object logic is 'layered' in the service directory (I guess you could call this Go's version of method overloading ). 
+For this project the _business objects_ (history, numbering, user) are presented as separate service interfaces (defined in the root folder; history.go, numbering.go, user.go), then service/object logic is 'layered' in the service directory (I guess you could call this Go's version of method overloading ). 
 
 To demonstrate using an example from the project folders. 
 
-- 'numbering' is a _business object_ 
+- 'numbering' is a _business object_ implemented as a service
 - /numbering.go <- this defines the _business object API_ ie. interface and structs  
 - /internal/service/numbering.go <- this implements the numbering interface to the core service 
 - /internal/service/datastore/numbering.go <- this implements the numbering storage layer
@@ -192,15 +192,15 @@ See section on running client-server above for more detials.
 
 ## Project folder structure 
 ```
-/   #root contains business domain 'schema' (structs/interfaces). 
+/   #root contains the services 'schema' (structs/interfaces). 
     /cmd
         /numand     # server 
         /numan      # command line client 
     /internal 
-        /service        # core servicelication 
-                /datastore    # db storage (sqlite in this case)
+        /service        # core service applications 
+                /datastore    # db storage layer (sqlite in this case)
         /cmdcli     # simple cli helper lib 
-     /scripts        # external scripts 
+     /scripts       # external scripts 
     /api
         /grpc       # gRPC protobuff def & generated files 
     /examples       # example installation
