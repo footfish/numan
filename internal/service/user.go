@@ -1,4 +1,4 @@
-package app
+package service
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/footfish/numan"
-	"github.com/footfish/numan/internal/app/datastore"
+	"github.com/footfish/numan/internal/service/datastore"
 	"golang.org/x/crypto/bcrypt"
 )
 

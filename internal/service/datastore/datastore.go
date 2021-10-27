@@ -50,6 +50,21 @@ func NewStore(dsn string) *Store {
 		`); err != nil {
 		panic(err)
 	}
+	// Create the table if it does not exist
+	if _, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS history (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			timestamp INTEGER NOT NULL, 
+			cc NCHAR(3) NOT NULL,
+			ndc NCHAR(4) NOT NULL,
+			sn NCHAR(13) NOT NULL, 
+			ownerID  INTEGER NOT NULL DEFAULT 0,
+			action TEXT NOT NULL,
+			notes TEXT
+		);
+		`); err != nil {
+		panic(err)
+	}
 
 	return &Store{db: db}
 }

@@ -152,7 +152,6 @@ func (s *numberingService) Delete(ctx context.Context, phonenumber *numan.E164) 
 	if n, _ := row.RowsAffected(); n == 0 { //ok for sqlite. RowsAffected may not be supported with other drivers.
 		return errors.New("Unable to delete, check the number")
 	}
-	//TODO - log to history
 	return nil
 }
 
@@ -185,7 +184,6 @@ func (s *numberingService) View(ctx context.Context, number *numan.E164) (view s
 		}
 	}
 
-	// TODO - History
 	return view, nil
 }
 
@@ -200,7 +198,7 @@ func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, owne
 	if n, _ := row.RowsAffected(); n == 0 { //ok for sqlite. RowsAffected may not be supported with other drivers.
 		return errors.New("Unable to reserve number (check number, already reserved?)")
 	}
-	//TODO - log to history
+
 	return nil
 }
 
@@ -215,7 +213,6 @@ func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, own
 	if n, _ := row.RowsAffected(); n == 0 { //ok for sqlite. RowsAffected may not be supported with other drivers.
 		return errors.New("Unable to allocate number (check number, already allocated?)")
 	}
-	//TODO - log to history
 	return nil
 }
 
@@ -229,7 +226,6 @@ func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164) e
 	if n, _ := row.RowsAffected(); n == 0 { //ok for sqlite. RowsAffected may not be supported with other drivers.
 		return errors.New("Unable to de-allocate number (check number, already de-allocated?)")
 	}
-	//TODO - log to history
 	return nil
 }
 
@@ -242,7 +238,6 @@ func (s *numberingService) Portout(ctx context.Context, number *numan.E164, Port
 	if n, _ := row.RowsAffected(); n == 0 { //ok for sqlite. RowsAffected may not be supported with other drivers.
 		return errors.New("Unable to set ported out date. db update failed, check number ")
 	}
-	//TODO - log to history
 	return nil
 }
 
@@ -255,6 +250,5 @@ func (s *numberingService) Portin(ctx context.Context, number *numan.E164, Porti
 	if n, _ := row.RowsAffected(); n == 0 { //ok for sqlite. RowsAffected may not be supported with other drivers.
 		return errors.New("Unable to set ported in date. db update failed, check number ")
 	}
-	//TODO - log to history
 	return nil
 }

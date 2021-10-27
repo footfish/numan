@@ -1,0 +1,33 @@
+syntax = "proto3";
+package grpc;
+import "numbering.proto";
+
+option go_package = "https://github.com/footfish/numan/api/grpc";
+
+service History {
+     //Finds history entries logged for a particular number
+    rpc ListHistoryByNumber (ListHistoryByNumberRequest) returns (ListHistoryResponse) {}
+    //Finds history entries logged for a particual owner
+    rpc ListHistoryByOID (ListHistoryByOIDRequest) returns (ListHistoryResponse) {}
+    }
+
+message ListHistoryByNumberRequest {
+    E164 e164 = 1;
+    }
+
+message ListHistoryByOIDRequest {
+    int64 ownerID = 1;
+}
+
+message ListHistoryResponse {
+    repeated HistoryEntry historyEntry = 1;
+}
+
+message HistoryEntry {
+    int64 timestamp = 1; 
+    E164  e164 = 2;
+    int64 ownerID = 3;
+    string action = 4;
+    string notes = 5;
+    }
+

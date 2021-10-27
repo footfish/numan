@@ -1,4 +1,4 @@
-package app
+package service
 
 import (
 	"context"
@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"github.com/footfish/numan"
-	"github.com/footfish/numan/internal/app/datastore"
+	"github.com/footfish/numan/internal/service/datastore"
 )
 
 // numberingService implements the NumberingService interface
 type numberingService struct {
 	next numan.NumberingService
+	hist numan.HistoryService //used for logging
 	auth numan.User
 }
 
@@ -20,6 +21,7 @@ type numberingService struct {
 func NewNumberingService(store *datastore.Store) numan.NumberingService {
 	return &numberingService{
 		next: datastore.NewNumberingService(store),
+		hist: NewHistoryService(store),
 	}
 }
 
@@ -35,8 +37,12 @@ func (s *numberingService) Add(ctx context.Context, number *numan.Numbering) err
 		return errors.New("Carrier & domain required")
 	}
 	newNumber := numan.Numbering{E164: number.E164, Domain: number.Domain, Carrier: number.Carrier} //clean
-	//add to storage
-	return s.next.Add(ctx, &newNumber)
+
+	err := s.next.Add(ctx, &newNumber) //storage
+	if err == nil {                    //log history
+		err = s.hist.AddHistory(ctx, numan.History{E164: newNumber.E164, Action: "added", Notes: "Domain:" + number.Domain + ", Carrier:" + number.Carrier})
+	}
+	return err
 }
 
 //AddGroup not implemented
@@ -78,7 +84,11 @@ func (s *numberingService) Delete(ctx context.Context, phonenumber *numan.E164) 
 	if phonenumber == nil {
 		return errors.New("nil pointer")
 	}
-	return s.next.Delete(ctx, phonenumber)
+	err := s.next.Delete(ctx, phonenumber)
+	if err == nil { //log history
+		err = s.hist.AddHistory(ctx, numan.History{E164: *phonenumber, Action: "deleted"})
+	}
+	return err
 }
 
 //View implements NumberingService.View()
@@ -120,7 +130,12 @@ func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, own
 	if err := numan.ValidOwnerID(ownerID); err != nil {
 		return errors.New("Can't allocate number, " + err.Error())
 	}
-	return s.next.Allocate(ctx, number, ownerID)
+
+	err := s.next.Allocate(ctx, number, ownerID)
+	if err == nil { //log history
+		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "allocated", OwnerID: *ownerID})
+	}
+	return err
 }
 
 //DeAllocate implements NumberingService.DeAllocate()
@@ -130,9 +145,13 @@ func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164) e
 	}
 
 	if err := number.ValidE164(); err != nil {
-		return errors.New("Can't allocate number, " + err.Error())
+		return errors.New("Can't deallocate number, " + err.Error())
 	}
-	return s.next.DeAllocate(ctx, number)
+	err := s.next.DeAllocate(ctx, number)
+	if err == nil { //log history
+		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "deallocated"})
+	}
+	return err
 }
 
 //Portout implements NumberingService.Portout()
@@ -148,7 +167,11 @@ func (s *numberingService) Portout(ctx context.Context, number *numan.E164, Port
 	if err := number.ValidE164(); err != nil {
 		return errors.New("Can't, " + err.Error())
 	}
-	return s.next.Portout(ctx, number, PortoutTS)
+	err := s.next.Portout(ctx, number, PortoutTS)
+	if err == nil { //log history
+		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "port-out", Notes: "Scheduled: " + time.Unix(*PortoutTS, 0).String()})
+	}
+	return err
 }
 
 //Portin implements NumberingService.Portin()
@@ -164,5 +187,9 @@ func (s *numberingService) Portin(ctx context.Context, number *numan.E164, Porti
 	if err := number.ValidE164(); err != nil {
 		return errors.New("Can't, " + err.Error())
 	}
-	return s.next.Portin(ctx, number, PortinTS)
+	err := s.next.Portin(ctx, number, PortinTS)
+	if err == nil { //log history
+		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "port-in", Notes: "Scheduled: " + time.Unix(*PortinTS, 0).String()})
+	}
+	return err
 }

@@ -4,14 +4,18 @@ import (
 	"context"
 
 	"github.com/footfish/numan"
-	"github.com/footfish/numan/internal/app"
-	"github.com/footfish/numan/internal/app/datastore"
+	"github.com/footfish/numan/internal/service"
+	"github.com/footfish/numan/internal/service/datastore"
 	"google.golang.org/grpc"
 )
 
-//numberingClientAdapter is used to implement Adapter from Numbering to NumberingClient.
+//Adaptors are used to facilitate transparent gRPC transport.
+//They adapt the service interface to gRPC interface and visa versa.
+//ie. Cli (main) -> Service Interface -> ClientAdapter -> grpc transport -> ServiceAdapter -> Service Interface (service)
+
+//numberingClientAdapter implements an adapter from NumberingService to NumberingClient(gRPC).
 type numberingClientAdapter struct {
-	numbering *numberingClient
+	grpc *numberingClient
 }
 
 // NewNumberingClientAdapter instantiates NumberingClientAdaptor
@@ -20,23 +24,9 @@ func NewNumberingClientAdapter(conn *grpc.ClientConn) numan.NumberingService {
 	return &numberingClientAdapter{c.(*numberingClient)}
 }
 
-/*
-// NewNumberingClientAdapter instantiates NumberingClientAdaptor
-func NewNumberingClientAdapter(address string, creds credentials.TransportCredentials) numan.NumberingService {
-	// Set up a connection to the server.
-	//conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds),
-		grpc.WithUnaryInterceptor(authClientInterceptor))
-	if err != nil {
-		panic(err)
-	}
-	c := NewNumberingClient(conn)
-	return &numberingClientAdapter{c.(*numberingClient)}
-}
-*/
 // Add implements NumberingService.Add()
 func (c *numberingClientAdapter) Add(ctx context.Context, number *numan.Numbering) error {
-	_, err := c.numbering.Add(ctx, &AddRequest{Number: marshalNumber(number)})
+	_, err := c.grpc.Add(ctx, &AddRequest{Number: marshalNumber(number)})
 	return err
 }
 
@@ -46,7 +36,7 @@ func (c *numberingClientAdapter) AddGroup(ctx context.Context) {
 
 // List implements NumberingService.List()
 func (c *numberingClientAdapter) List(ctx context.Context, filter *numan.NumberFilter) (numbers []numan.Numbering, err error) {
-	numberList, err := c.numbering.List(ctx, &ListRequest{NumberFilter: marshalNumberFilter(filter)})
+	numberList, err := c.grpc.List(ctx, &ListRequest{NumberFilter: marshalNumberFilter(filter)})
 	if err == nil {
 		for _, number := range numberList.Number {
 			numbers = append(numbers, *unMarshalNumber(number))
@@ -57,7 +47,7 @@ func (c *numberingClientAdapter) List(ctx context.Context, filter *numan.NumberF
 
 // ListOwnerID implements NumberingService.ListOwnerID()
 func (c *numberingClientAdapter) ListOwnerID(ctx context.Context, ownerID int64) (numbers []numan.Numbering, err error) {
-	numberList, err := c.numbering.ListOwnerID(ctx, &ListOwnerIDRequest{OwnerID: ownerID})
+	numberList, err := c.grpc.ListOwnerID(ctx, &ListOwnerIDRequest{OwnerID: ownerID})
 	if err == nil {
 		for _, number := range numberList.Number {
 			numbers = append(numbers, *unMarshalNumber(number))
@@ -68,43 +58,43 @@ func (c *numberingClientAdapter) ListOwnerID(ctx context.Context, ownerID int64)
 
 //Reserve implements NumberingService.Reserve()
 func (c *numberingClientAdapter) Reserve(ctx context.Context, number *numan.E164, ownerID *int64, untilTS *int64) error {
-	_, err := c.numbering.Reserve(ctx, &ReserveRequest{E164: marshalE164(number), OwnerID: *ownerID, UntilTS: *untilTS})
+	_, err := c.grpc.Reserve(ctx, &ReserveRequest{E164: marshalE164(number), OwnerID: *ownerID, UntilTS: *untilTS})
 	return err
 }
 
 //Allocate implements NumberingService.Allocate()
 func (c *numberingClientAdapter) Allocate(ctx context.Context, number *numan.E164, ownerID *int64) error {
-	_, err := c.numbering.Allocate(ctx, &AllocateRequest{E164: marshalE164(number), OwnerID: *ownerID})
+	_, err := c.grpc.Allocate(ctx, &AllocateRequest{E164: marshalE164(number), OwnerID: *ownerID})
 	return err
 }
 
 //DeAllocate implements NumberingService.DeAllocate()
 func (c *numberingClientAdapter) DeAllocate(ctx context.Context, number *numan.E164) error {
-	_, err := c.numbering.DeAllocate(ctx, &DeAllocateRequest{E164: marshalE164(number)})
+	_, err := c.grpc.DeAllocate(ctx, &DeAllocateRequest{E164: marshalE164(number)})
 	return err
 }
 
 //Portout implements NumberingService.Portout()
 func (c *numberingClientAdapter) Portout(ctx context.Context, number *numan.E164, portoutTS *int64) error {
-	_, err := c.numbering.Portout(ctx, &PortoutRequest{E164: marshalE164(number), PortoutTS: *portoutTS})
+	_, err := c.grpc.Portout(ctx, &PortoutRequest{E164: marshalE164(number), PortoutTS: *portoutTS})
 	return err
 }
 
 //Portin implements NumberingService.Portin()
 func (c *numberingClientAdapter) Portin(ctx context.Context, number *numan.E164, portinTS *int64) error {
-	_, err := c.numbering.Portin(ctx, &PortinRequest{E164: marshalE164(number), PortinTS: *portinTS})
+	_, err := c.grpc.Portin(ctx, &PortinRequest{E164: marshalE164(number), PortinTS: *portinTS})
 	return err
 }
 
 //Delete implements NumberingService.Delete()
 func (c *numberingClientAdapter) Delete(ctx context.Context, number *numan.E164) error {
-	_, err := c.numbering.Delete(ctx, &DeleteRequest{E164: marshalE164(number)})
+	_, err := c.grpc.Delete(ctx, &DeleteRequest{E164: marshalE164(number)})
 	return err
 }
 
 //View implements NumberingService.View()
 func (c *numberingClientAdapter) View(ctx context.Context, number *numan.E164) (string, error) {
-	resp, err := c.numbering.View(ctx, &ViewRequest{E164: marshalE164(number)})
+	resp, err := c.grpc.View(ctx, &ViewRequest{E164: marshalE164(number)})
 	if err != nil {
 		return err.Error(), err
 	}
@@ -113,7 +103,7 @@ func (c *numberingClientAdapter) View(ctx context.Context, number *numan.E164) (
 
 //Summary implements NumberingService.Summary()
 func (c *numberingClientAdapter) Summary(ctx context.Context) (string, error) {
-	resp, err := c.numbering.Summary(ctx, &SummaryRequest{})
+	resp, err := c.grpc.Summary(ctx, &SummaryRequest{})
 	if err != nil {
 		return err.Error(), err
 	}
@@ -121,38 +111,27 @@ func (c *numberingClientAdapter) Summary(ctx context.Context) (string, error) {
 
 }
 
-//GetHistoryByNumber implements HistoryAPI.GetHistoryByNumber()
-func (c *numberingClientAdapter) GetHistoryByNumber(ctx context.Context, phoneNumber numan.E164) (history []numan.History, err error) {
-	return
-}
-
-//GetHistoryByOwnerID implements HistoryAPI.GetHistoryByUserId()
-func (c *numberingClientAdapter) GetHistoryByOwnerID(ctx context.Context, ownerID int64) (history []numan.History, err error) {
-	return
-}
-
-//numberingServerAdapter server is used to implement Adapter from NumberingServer to Numan.
+//numberingServerAdapter implements an adapter from NumberingServer(gRPC) to NumberingService.
 type numberingServerAdapter struct {
-	//numbering *app.NumanService
-	numbering numan.NumberingService
+	service numan.NumberingService
 	UnimplementedNumberingServer
 }
 
 // NewNumberingServerAdapter creates a new NumberingServerAdapter
 func NewNumberingServerAdapter(store *datastore.Store) NumberingServer {
-	return &numberingServerAdapter{numbering: app.NewNumberingService(store)}
+	return &numberingServerAdapter{service: service.NewNumberingService(store)}
 }
 
 //Add implements NumberingServer.Add()
 func (s *numberingServerAdapter) Add(ctx context.Context, in *AddRequest) (*AddResponse, error) {
-	err := s.numbering.Add(ctx, unMarshalNumber(in.Number))
+	err := s.service.Add(ctx, unMarshalNumber(in.Number))
 	return &AddResponse{}, err
 }
 
 //List implements NumberingServer.List()
 func (s *numberingServerAdapter) List(ctx context.Context, in *ListRequest) (*ListResponse, error) {
 	numberFilter := unMarshalNumberFilter(in.NumberFilter)
-	numberList, err := s.numbering.List(ctx, numberFilter)
+	numberList, err := s.service.List(ctx, numberFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +146,7 @@ func (s *numberingServerAdapter) List(ctx context.Context, in *ListRequest) (*Li
 //ListOwnerID implements NumberingServer.ListOwnerID()
 func (s *numberingServerAdapter) ListOwnerID(ctx context.Context, in *ListOwnerIDRequest) (*ListOwnerIDResponse, error) {
 
-	numberList, err := s.numbering.ListOwnerID(ctx, in.OwnerID)
+	numberList, err := s.service.ListOwnerID(ctx, in.OwnerID)
 	if err != nil {
 		return nil, err
 	}
@@ -181,49 +160,49 @@ func (s *numberingServerAdapter) ListOwnerID(ctx context.Context, in *ListOwnerI
 
 //Reserve implements NumberingServer.Reserve()
 func (s *numberingServerAdapter) Reserve(ctx context.Context, in *ReserveRequest) (*ReserveResponse, error) {
-	err := s.numbering.Reserve(ctx, unMarshalE164(in.E164), &in.OwnerID, &in.UntilTS)
+	err := s.service.Reserve(ctx, unMarshalE164(in.E164), &in.OwnerID, &in.UntilTS)
 	return &ReserveResponse{}, err
 }
 
 //Allocate  implements NumberingServer.Reserve()
 func (s *numberingServerAdapter) Allocate(ctx context.Context, in *AllocateRequest) (*AllocateResponse, error) {
-	err := s.numbering.Allocate(ctx, unMarshalE164(in.E164), &in.OwnerID)
+	err := s.service.Allocate(ctx, unMarshalE164(in.E164), &in.OwnerID)
 	return &AllocateResponse{}, err
 }
 
 //DeAllocate  implements NumberingServer.DeAllocate()
 func (s *numberingServerAdapter) DeAllocate(ctx context.Context, in *DeAllocateRequest) (*DeAllocateResponse, error) {
-	err := s.numbering.DeAllocate(ctx, unMarshalE164(in.E164))
+	err := s.service.DeAllocate(ctx, unMarshalE164(in.E164))
 	return &DeAllocateResponse{}, err
 }
 
 //Portout  implements NumberingServer.Portout()
 func (s *numberingServerAdapter) Portout(ctx context.Context, in *PortoutRequest) (*PortoutResponse, error) {
-	err := s.numbering.Portout(ctx, unMarshalE164(in.E164), &in.PortoutTS)
+	err := s.service.Portout(ctx, unMarshalE164(in.E164), &in.PortoutTS)
 	return &PortoutResponse{}, err
 }
 
 //Portin  implements NumberingServer.Portin()
 func (s *numberingServerAdapter) Portin(ctx context.Context, in *PortinRequest) (*PortinResponse, error) {
-	err := s.numbering.Portin(ctx, unMarshalE164(in.E164), &in.PortinTS)
+	err := s.service.Portin(ctx, unMarshalE164(in.E164), &in.PortinTS)
 	return &PortinResponse{}, err
 }
 
 //Delete  implements NumberingServer.Delete()
 func (s *numberingServerAdapter) Delete(ctx context.Context, in *DeleteRequest) (resp *DeleteResponse, err error) {
-	err = s.numbering.Delete(ctx, unMarshalE164(in.E164))
+	err = s.service.Delete(ctx, unMarshalE164(in.E164))
 	return &DeleteResponse{}, err
 }
 
 //View  implements NumberingServer.View()
 func (s *numberingServerAdapter) View(ctx context.Context, in *ViewRequest) (*ViewResponse, error) {
-	message, err := s.numbering.View(ctx, unMarshalE164(in.E164))
+	message, err := s.service.View(ctx, unMarshalE164(in.E164))
 	return &ViewResponse{Message: message}, err
 }
 
 //Summary implements NumberingServer.Summary()
 func (s *numberingServerAdapter) Summary(ctx context.Context, in *SummaryRequest) (*SummaryResponse, error) {
-	message, err := s.numbering.Summary(ctx)
+	message, err := s.service.Summary(ctx)
 	return &SummaryResponse{Message: message}, err
 }
 

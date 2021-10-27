@@ -16,18 +16,19 @@ It's a personal learning project (to replace an excel file). The main purpose is
 
 The project loosely uses [DDD (domain driven design)](https://en.wikipedia.org/wiki/Domain-driven_design) and the  [standard Go project layout](https://github.com/golang-standards/project-layout). 
 
-DDD's main principle is that classes should match the business domain. In this case the main _business objects_ being a 'numbering' record and a change 'history'. 
+DDD's main principle is that classes should match the business domain. In this case the main _business objects_ being a 'numbering' record, a change 'history' log and the 'users'. 
 
-For this project the _business objects_ (history, numbering, user) are defined as an interface in the root folder (history.go, numbering.go, user.go), then object logic is 'layered' in the app directory (I guess you could call this Go's version of method overloading ). 
+For this project the _business objects_ (history, numbering, user) are defined as an interface in the root folder (history.go, numbering.go, user.go), then object logic is 'layered' in the service directory (I guess you could call this Go's version of method overloading ). 
 
 To demonstrate using an example from the project folders. 
 
 - 'numbering' is a _business object_ 
 - /numbering.go <- this defines the _business object API_ ie. interface and structs  
-- /internal/app/numbering.go <- this implements the numbering interface to the core application 
-- /internal/app/datastore/numbering.go <- this implements the numbering storage layer
+- /internal/service/numbering.go <- this implements the numbering interface to the core service 
+- /internal/service/datastore/numbering.go <- this implements the numbering storage layer
 
 This pattern allows for: 
+- Separation of concerns 
 - Easily changing/adding new layers. For example swapping to a different storage mechanism. 
 - Avoids circular dependencies (which go does not allow). 
 
@@ -196,7 +197,7 @@ See section on running client-server above for more detials.
         /numand     # server 
         /numan      # command line client 
     /internal 
-        /app        # core application 
+        /service        # core servicelication 
                 /datastore    # db storage (sqlite in this case)
         /cmdcli     # simple cli helper lib 
      /scripts        # external scripts 
@@ -207,7 +208,7 @@ See section on running client-server above for more detials.
     /vendor #Application dependencies (go mod controls this)
     /configs #default configs.
     /init #System init (systemd, upstart, sysv)
-    /test #Additional external test apps and test data.
+    /test #Additional external test services and test data.
     /docs #Design and user documents (in addition to your godoc generated documentation).
 ```
 

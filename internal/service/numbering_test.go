@@ -1,7 +1,7 @@
-package app_test
+package service_test
 
 //Run tests from numan root with;
-//go test -v -cover ./internal/app -coverpkg github.com/footfish/numan/internal/app,github.com/footfish/numan/internal/store
+//go test -v -cover ./internal/service -coverpkg github.com/footfish/numan/internal/service,github.com/footfish/numan/internal/store
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/footfish/numan"
-	. "github.com/footfish/numan/internal/app"
-	"github.com/footfish/numan/internal/app/datastore"
+	. "github.com/footfish/numan/internal/service"
+	"github.com/footfish/numan/internal/service/datastore"
 )
 
 // validPhoneNumbers

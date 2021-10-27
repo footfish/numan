@@ -13,9 +13,9 @@ import (
 
 	"github.com/footfish/numan"
 	"github.com/footfish/numan/api/grpc"
-	"github.com/footfish/numan/internal/app"
-	"github.com/footfish/numan/internal/app/datastore"
 	"github.com/footfish/numan/internal/cmdcli"
+	"github.com/footfish/numan/internal/service"
+	"github.com/footfish/numan/internal/service/datastore"
 	"github.com/gookit/color"
 	"github.com/joho/godotenv"
 	"github.com/lensesio/tableprinter"
@@ -48,12 +48,12 @@ func main() {
 	}
 
 	var c client
-	if conf.ServerAddress == "" { //standalone application with local db connection
+	if conf.ServerAddress == "" { //standalone servicelication with local db connection
 		store := datastore.NewStore(conf.Dsn)
 		defer store.Close()
-		c.numbering = app.NewNumberingService(store)
-		c.history = app.NewHistoryService(store)
-		c.user = app.NewUserService(store)
+		c.numbering = service.NewNumberingService(store)
+		c.history = service.NewHistoryService(store)
+		c.user = service.NewUserService(store)
 	} else { //via gRPC
 		var creds credentials.TransportCredentials
 		if conf.TlsCert == "" { //Using trusted CA, no need to load client cert
@@ -145,12 +145,12 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmd.NewIntParameter("oid", true)
 	cmd.NewIntParameter("minutes", true).SetRegexp("^[0-9]{1,2}$")
 
-	cmdDescription = "Sets a porting out date (dd/mm/yy)"
+	cmdDescription = "Sets a porting out date (dd/mm/yyyy)"
 	cmd = cli.NewCommand("portout", c.portout, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 	cmd.NewDateParameter("date", true)
 
-	cmdDescription = "Sets a porting in date (dd/mm/yy)"
+	cmdDescription = "Sets a porting in date (dd/mm/yyyy)"
 	cmd = cli.NewCommand("portin", c.portin, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 	cmd.NewDateParameter("date", true)
