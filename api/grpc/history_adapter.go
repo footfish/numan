@@ -5,6 +5,8 @@ import (
 	"errors"
 
 	"github.com/footfish/numan"
+	"github.com/footfish/numan/internal/service"
+	"github.com/footfish/numan/internal/service/datastore"
 	"google.golang.org/grpc"
 )
 
@@ -62,6 +64,11 @@ func (c *historyClientAdapter) ListHistoryByOwnerID(ctx context.Context, ownerID
 type historyServerAdapter struct {
 	service numan.HistoryService
 	UnimplementedHistoryServer
+}
+
+//  NewHistoryServerAdapter creates a new  HistoryServerAdapter
+func NewHistoryServerAdapter(store *datastore.Store) HistoryServer {
+	return &historyServerAdapter{service: service.NewHistoryService(store)}
 }
 
 //ListHistoryByNumber implements HistoryServer.ListHistoryByNumber()

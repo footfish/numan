@@ -48,9 +48,11 @@ func main() {
 	grpcServer := grpc.NewGrpcServer(creds)
 
 	numberingServerAdapter := grpc.NewNumberingServerAdapter(store)
+	historyServerAdapter := grpc.NewHistoryServerAdapter(store)
 	userServerAdapter := grpc.NewUserServerAdapter(store)
 
 	grpc.RegisterNumberingServer(grpcServer, numberingServerAdapter)
+	grpc.RegisterHistoryServer(grpcServer, historyServerAdapter)
 	grpc.RegisterUserServer(grpcServer, userServerAdapter)
 
 	reflection.Register(grpcServer)

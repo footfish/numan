@@ -1,6 +1,7 @@
 # numan - a phone number management tool 
 
-This is an example Go project. It's a simple command line tool to keep track of phone number allocations/reservations (for a service provider). It's implemented as a gRPC microservice. Data is stored in an sqlite db. 
+This is an example Go gRPC microservice project.
+It's a simple command line tool to keep track of phone number allocations/reservations (for a service provider). Data is stored in an sqlite db. 
 
 ```
 General Usage:-
@@ -240,8 +241,8 @@ would require locking mechanism for reservation
 would require prevention of 'mass booking', perhaps client lock. 
 
 ## Useful Links
-Sqlite command line tools - https://www.sqlite.org/cli.html
-grpcurl - https://github.com/fullstorydev/grpcurl
+* Sqlite command line tools - https://www.sqlite.org/cli.html
+* grpcurl - https://github.com/fullstorydev/grpcurl
 
 ## Useful References
 

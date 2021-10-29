@@ -31,5 +31,5 @@ func (s *historyService) ListHistoryByNumber(ctx context.Context, phoneNumber nu
 
 //ListHistoryByOwnerID implements HistoryService.ListHistoryByUserId()
 func (s *historyService) ListHistoryByOwnerID(ctx context.Context, ownerID int64) (history []numan.History, err error) {
-	return
+	return s.next.ListHistoryByOwnerID(ctx, ownerID)
 }

@@ -30,11 +30,75 @@ func (s *historyService) AddHistory(ctx context.Context, historyEntry numan.Hist
 }
 
 //ListHistoryByNumber implements HistoryService.ListHistoryByNumber()
-func (s *historyService) ListHistoryByNumber(ctx context.Context, phoneNumber numan.E164) (history []numan.History, err error) {
-	return
+func (s *historyService) ListHistoryByNumber(ctx context.Context, phoneNumber numan.E164) ([]numan.History, error) {
+	if phoneNumber.ValidE164() != nil {
+		return nil, errors.New("Incorrect number format")
+	}
+
+	var result numan.History
+	var resultList []numan.History
+
+	rows, err := s.store.db.Query("SELECT timestamp, cc, ndc, sn, ownerID, action, ifnull(notes,'') FROM history where cc=? and ndc=? and sn=? order by timestamp asc", phoneNumber.Cc, phoneNumber.Ndc, phoneNumber.Sn)
+	if err != nil {
+		return resultList, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(
+			&result.Timestamp,
+			&result.E164.Cc,
+			&result.E164.Ndc,
+			&result.E164.Sn,
+			&result.OwnerID,
+			&result.Action,
+			&result.Notes,
+		)
+		if err != nil {
+			return resultList, err
+		}
+		resultList = append(resultList, result)
+	}
+	err = rows.Err()
+	if err != nil {
+		return resultList, err
+	}
+	return resultList, nil
 }
 
 //ListHistoryByOwnerID implements HistoryService.ListHistoryByUserId()
-func (s *historyService) ListHistoryByOwnerID(ctx context.Context, ownerID int64) (history []numan.History, err error) {
-	return
+func (s *historyService) ListHistoryByOwnerID(ctx context.Context, ownerID int64) ([]numan.History, error) {
+	if numan.ValidOwnerID(&ownerID) != nil {
+		return nil, errors.New("Incorrect Owner ID format")
+	}
+
+	var result numan.History
+	var resultList []numan.History
+
+	rows, err := s.store.db.Query("SELECT timestamp, cc, ndc, sn, ownerID, action, ifnull(notes,'') FROM history where ownerID=? order by timestamp asc", ownerID)
+	if err != nil {
+		return resultList, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(
+			&result.Timestamp,
+			&result.E164.Cc,
+			&result.E164.Ndc,
+			&result.E164.Sn,
+			&result.OwnerID,
+			&result.Action,
+			&result.Notes,
+		)
+		if err != nil {
+			return resultList, err
+		}
+		resultList = append(resultList, result)
+	}
+	err = rows.Err()
+	if err != nil {
+		return resultList, err
+	}
+	return resultList, nil
 }

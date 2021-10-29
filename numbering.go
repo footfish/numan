@@ -11,6 +11,8 @@ const (
 	MAXRESERVATIONTIME = 108000 //in secs (30 mins)
 	//DATEPRINTFORMAT the format used for display of timestamps
 	DATEPRINTFORMAT = "02/01/2006"
+	//TIMESTAMPPRINTFORMAT the format used for display of timestamps
+	TIMESTAMPPRINTFORMAT = "02/01/06 15:04"
 	//QUARANTINE period in seconds. Numbers can't be reserved/allocated during quarantie.
 	QUARANTINE = 13 * 31 * 24 * 60 * 60 //  (13 months approx)
 )

@@ -67,7 +67,7 @@ func main() {
 		}
 		grpcClient := grpc.NewGrpcClient(conf.ServerAddress, creds)
 		c.numbering = grpc.NewNumberingClientAdapter(grpcClient)
-		//		c.history = grpc.NewHistoryClientAdapter(grpcClient)
+		c.history = grpc.NewHistoryClientAdapter(grpcClient)
 		c.user = grpc.NewUserClientAdapter(grpcClient)
 	}
 
@@ -167,6 +167,13 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmdDescription = "Provides a summary of number database"
 	cmd = cli.NewCommand("summary", c.summary, cmdDescription)
 
+	cmdDescription = "Lists history log for an owner"
+	cmd = cli.NewCommand("history_owner", c.listHistoryOwner, cmdDescription)
+	cmd.NewIntParameter("oid", true)
+
+	cmdDescription = "Lists history log for a number"
+	cmd = cli.NewCommand("history", c.listHistoryNumber, cmdDescription)
+	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 	return cli
 }
 
@@ -449,6 +456,71 @@ func printNumberList(numberList []numan.Numbering) {
 			DeAllocated: dateConv(n.DeAllocated),
 			PortedIn:    dateConv(n.PortedIn),
 			PortedOut:   dateConv(n.PortedOut),
+		})
+	}
+	printer.Print(table)
+}
+
+//	history_owner <oid>
+func (c *client) listHistoryOwner(p cmdcli.RxParameters) {
+	ownerID := p["oid"].(int64)
+
+	if historyList, err := c.history.ListHistoryByOwnerID(c.ctx, ownerID); err != nil {
+		color.Warn.Println(err)
+		os.Exit(1)
+	} else {
+		printHistoryList(historyList)
+	}
+}
+
+//	history <phonenumber>
+func (c *client) listHistoryNumber(p cmdcli.RxParameters) {
+	splitNumber := strings.Split(p["phonenumber"].(string), "-")
+	number := numan.E164{
+		Cc:  splitNumber[0],
+		Ndc: splitNumber[1],
+		Sn:  splitNumber[2]}
+
+	if historyList, err := c.history.ListHistoryByNumber(c.ctx, number); err != nil {
+		color.Warn.Println(err)
+		os.Exit(1)
+	} else {
+		printHistoryList(historyList)
+	}
+}
+
+//printHistoryList prints slice of numan.History as a table
+func printHistoryList(historyList []numan.History) {
+	printer := tableprinter.New(os.Stdout)
+
+	type tableRow struct {
+		Timestamp string `header:"Timestamp"`
+		Action    string `header:"Action"`
+		Number    string `header:"Number"`
+		OwnerID   int64  `header:"Owner"`
+		Notes     string `header:"Notes"`
+	}
+	table := []tableRow{}
+
+	printer.BorderTop, printer.BorderBottom, printer.BorderLeft, printer.BorderRight = true, true, true, true
+	printer.CenterSeparator = "│"
+	printer.ColumnSeparator = "│"
+	printer.RowSeparator = "─"
+
+	dateConv := func(unixTime int64) string {
+		if unixTime == 0 {
+			return "-"
+		}
+		return time.Unix(unixTime, 0).Format(numan.TIMESTAMPPRINTFORMAT)
+	}
+
+	for _, n := range historyList {
+		table = append(table, tableRow{
+			Timestamp: dateConv(n.Timestamp),
+			Action:    n.Action,
+			Number:    fmt.Sprintf("%v-%v-%v", n.E164.Cc, n.E164.Ndc, n.E164.Sn),
+			OwnerID:   n.OwnerID,
+			Notes:     n.Notes,
 		})
 	}
 	printer.Print(table)

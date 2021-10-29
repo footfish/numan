@@ -169,7 +169,7 @@ func (s *numberingService) Portout(ctx context.Context, number *numan.E164, Port
 	}
 	err := s.next.Portout(ctx, number, PortoutTS)
 	if err == nil { //log history
-		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "port-out", Notes: "Scheduled: " + time.Unix(*PortoutTS, 0).String()})
+		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "port-out", Notes: "Scheduled: " + time.Unix(*PortoutTS, 0).Format(numan.TIMESTAMPPRINTFORMAT)})
 	}
 	return err
 }
@@ -189,7 +189,7 @@ func (s *numberingService) Portin(ctx context.Context, number *numan.E164, Porti
 	}
 	err := s.next.Portin(ctx, number, PortinTS)
 	if err == nil { //log history
-		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "port-in", Notes: "Scheduled: " + time.Unix(*PortinTS, 0).String()})
+		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "port-in", Notes: "Scheduled: " + time.Unix(*PortinTS, 0).Format(numan.TIMESTAMPPRINTFORMAT)})
 	}
 	return err
 }
