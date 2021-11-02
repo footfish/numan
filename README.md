@@ -130,6 +130,12 @@ Supported Commands:-
         deallocate <phonenumber>
                 De-allocates a number from an owner
 
+        history <phonenumber>
+                Lists history log for a number
+
+        history_owner <oid>
+                Lists history log for an owner
+
         list <phonenumber> [domain] 
                 Lists number db entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted
 
@@ -181,11 +187,11 @@ See section on running client-server above for more detials.
 
 
 ## TODO
-- exend auth to all methods
+- command view for single number with history
+- extend auth to all methods
 - improve error handling 
 - expand tests 
 - add command user roles 
-- number history 
 - memory store for user auth
 - sanity check/verification of user/pass 
 - add/remove call for users 

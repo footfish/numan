@@ -218,13 +218,13 @@ func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, own
 
 //DeAllocate implements NumberingService.DeAllocate()
 //Mark 'unused' & set de-allocation date (quarantine). Resets  ownerID, reservation & allocation dateflag.
-func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164) error {
-	row, err := s.store.db.Exec("UPDATE number set used=0, deallocated=?, reserved=0, allocated=0, ownerID=0 where used==1 and cc=? and ndc=? and sn=? and deallocated=0", time.Now().Unix(), number.Cc, number.Ndc, number.Sn)
+func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164, ownerID *int64) error {
+	row, err := s.store.db.Exec("UPDATE number set used=0, deallocated=?, reserved=0, allocated=0, ownerID=0 where used==1 and cc=? and ndc=? and sn=? and ownerID=? and deallocated=0", time.Now().Unix(), number.Cc, number.Ndc, number.Sn, ownerID)
 	if err != nil {
 		return err
 	}
 	if n, _ := row.RowsAffected(); n == 0 { //ok for sqlite. RowsAffected may not be supported with other drivers.
-		return errors.New("Unable to de-allocate number (check number, already de-allocated?)")
+		return errors.New("Unable to de-allocate number (Wrong owner?, already de-allocated?)")
 	}
 	return nil
 }

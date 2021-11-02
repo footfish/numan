@@ -163,6 +163,7 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmdDescription = "De-allocates a number from an owner"
 	cmd = cli.NewCommand("deallocate", c.deallocate, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
+	cmd.NewIntParameter("oid", true)
 
 	cmdDescription = "Provides a summary of number database"
 	cmd = cli.NewCommand("summary", c.summary, cmdDescription)
@@ -386,8 +387,9 @@ func (c *client) deallocate(p cmdcli.RxParameters) {
 		Cc:  splitNumber[0],
 		Ndc: splitNumber[1],
 		Sn:  splitNumber[2]}
+	ownerID := p["oid"].(int64)
 
-	if err := c.numbering.DeAllocate(c.ctx, &number); err != nil {
+	if err := c.numbering.DeAllocate(c.ctx, &number, &ownerID); err != nil {
 		color.Warn.Println(err)
 		if numberDetails, err := c.numbering.View(c.ctx, &number); err != nil {
 			color.Warn.Println(err)

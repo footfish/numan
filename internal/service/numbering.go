@@ -139,17 +139,17 @@ func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, own
 }
 
 //DeAllocate implements NumberingService.DeAllocate()
-func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164) error {
-	if number == nil {
+func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164, ownerID *int64) error {
+	if number == nil || ownerID == nil {
 		return errors.New("nil pointer")
 	}
 
 	if err := number.ValidE164(); err != nil {
 		return errors.New("Can't deallocate number, " + err.Error())
 	}
-	err := s.next.DeAllocate(ctx, number)
+	err := s.next.DeAllocate(ctx, number, ownerID)
 	if err == nil { //log history
-		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "deallocated"})
+		err = s.hist.AddHistory(ctx, numan.History{E164: *number, Action: "deallocated", OwnerID: *ownerID})
 	}
 	return err
 }

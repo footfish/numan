@@ -70,7 +70,7 @@ type NumberingService interface {
 	//Allocate marks a number 'used' by a User
 	Allocate(ctx context.Context, number *E164, ownerID *int64) error
 	//DeAllocate number from User (number goes to quarantine)
-	DeAllocate(ctx context.Context, number *E164) error
+	DeAllocate(ctx context.Context, number *E164, ownerID *int64) error
 	//Portout sets a port out date (just a log, doesn't care about state or do anything else)
 	Portout(ctx context.Context, number *E164, PortoutTS *int64) error
 	//Portin sets a port in date (just a log, doesn't care about state or do anything else)

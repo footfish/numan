@@ -76,6 +76,7 @@ message AddRequest {
 
   message DeAllocateRequest {
      E164 e164 = 1;
+     int64 ownerID = 2;
   }
 
   message DeAllocateResponse {

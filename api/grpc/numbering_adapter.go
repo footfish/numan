@@ -69,8 +69,8 @@ func (c *numberingClientAdapter) Allocate(ctx context.Context, number *numan.E16
 }
 
 //DeAllocate implements NumberingService.DeAllocate()
-func (c *numberingClientAdapter) DeAllocate(ctx context.Context, number *numan.E164) error {
-	_, err := c.grpc.DeAllocate(ctx, &DeAllocateRequest{E164: marshalE164(number)})
+func (c *numberingClientAdapter) DeAllocate(ctx context.Context, number *numan.E164, ownerID *int64) error {
+	_, err := c.grpc.DeAllocate(ctx, &DeAllocateRequest{E164: marshalE164(number), OwnerID: *ownerID})
 	return err
 }
 
@@ -172,7 +172,7 @@ func (s *numberingServerAdapter) Allocate(ctx context.Context, in *AllocateReque
 
 //DeAllocate  implements NumberingServer.DeAllocate()
 func (s *numberingServerAdapter) DeAllocate(ctx context.Context, in *DeAllocateRequest) (*DeAllocateResponse, error) {
-	err := s.service.DeAllocate(ctx, unMarshalE164(in.E164))
+	err := s.service.DeAllocate(ctx, unMarshalE164(in.E164), &in.OwnerID)
 	return &DeAllocateResponse{}, err
 }
 
