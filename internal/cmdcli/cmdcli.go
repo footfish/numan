@@ -130,7 +130,7 @@ func (c CommandConfigs) command(command string) CommandConfig {
 //printHelp prints usage & help for all commands
 func (c CommandConfigs) printHelp() {
 	color.Light.Println("\nGeneral Usage:-")
-	color.Info.Println("\tnuman command <param1> [param2] [..]. ")
+	color.Info.Println("\t" + os.Args[0] + " command <param1> [param2] [..]. ")
 	color.Note.Println("\t\tSyntax: <mandatory> , [optional] ")
 	color.Light.Println("\nSupported Commands:-")
 	color.Info.Print("\t")

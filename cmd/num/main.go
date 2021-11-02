@@ -42,7 +42,7 @@ var conf struct {
 
 func main() {
 	//Init conf from environmental vars
-	godotenv.Load("numan.env")
+	godotenv.Load("num.env")
 	if err := envconfig.Init(&conf); err != nil {
 		log.Fatalf("Failed to load required environmental variables for config: %v", err)
 	}

@@ -23,7 +23,7 @@ func main() {
 	}
 
 	//Init conf from environmental vars
-	godotenv.Load("numand.env")
+	godotenv.Load("numd.env")
 	if err := envconfig.Init(&conf); err != nil {
 		log.Fatalf("Failed to load required environmental variables for config: %v", err)
 	}

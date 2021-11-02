@@ -5,11 +5,11 @@ It's a simple command line tool to keep track of phone number allocations/reserv
 
 ```
 General Usage:-
-        numan command <param1> [param2] [..]. 
+        num command <param1> [param2] [..]. 
                 Syntax: <mandatory> , [optional] 
 
 Example:-
-        numan view 353-01-12345111    # view details for phone number 353-01-12345111
+        num view 353-01-12345111    # view details for phone number 353-01-12345111
 ```
 It's a personal (learning) project (to replace an excel file). The main purpose is to:
 - explore suitable Go project layout. 
@@ -43,8 +43,8 @@ $ go install ./cmd/...
  
 ```
 Two binaries are installed 
-*  numan (client or standalone)
-*  numand (server)
+*  num (client or standalone)
+*  numd (server)
 
 ## Configuration 
 Configuration is from environmental variables. 
@@ -60,17 +60,17 @@ Try the example:
 ```
 $ cd examples                   # contains sample config and db. 
 
-$ vi numan.env                  # remove/comment line SERVER_ADDRESS
+$ vi num.env                  # remove/comment line SERVER_ADDRESS
 
-$ numan                         # prints the command help 
+$ num                        # prints the command help 
 General Usage:-
         command <param1> [param2] [..]. 
                 Syntax: <mandatory> , [optional]
 
 # Sample usage (see /scripts folder for more examples)
-$ numan summary                 # prints a summary of the example database 
-$ numan list 353-01             # prints details of numbers starting 353-01
-$ numan view 353-01-12345111    # view all details for number 353-01-12345111
+$ num summary                 # prints a summary of the example database 
+$ num list 353-01             # prints details of numbers starting 353-01
+$ num view 353-01-12345111    # view all details for number 353-01-12345111
 
 ```
 ### Running Client-Server Mode
@@ -87,25 +87,25 @@ The client requires authentication. The username/password
 Try the example:  
 ``` 
 $ cd examples 
-$ numand &          # Start the server
+$ numd &          # Start the server
 Starting gRPC user service on [::]:50051...
 
-$ numan             # Run the client 
+$ num             # Run the client 
 General Usage:-
         command <param1> [param2] [..]. 
                 Syntax: <mandatory> , [optional]
 
 # Sample usage (see /scripts folder for more examples)
-$ numan summary                 # prints a summary of the example database 
-$ numan list 353-01             # prints details of numbers starting 353-01
-$ numan view 353-01-12345111    # view all details for numer 353-01-12345111
+$ num summary                 # prints a summary of the example database 
+$ num list 353-01             # prints details of numbers starting 353-01
+$ num view 353-01-12345111    # view all details for numer 353-01-12345111
 ```
 
 ## Usage 
 
 ```
 General Usage:-
-        numan command <param1> [param2] [..]. 
+        num command <param1> [param2] [..]. 
                 Syntax: <mandatory> , [optional] 
 
 Supported Commands:-
@@ -201,8 +201,8 @@ See section on running client-server above for more detials.
 ```
 /   #root contains the services 'schema' (structs/interfaces). 
     /cmd
-        /numand     # server 
-        /numan      # command line client 
+        /numd     # server 
+        /num      # command line client 
     /internal 
         /service        # core service applications 
                 /datastore    # db storage layer (sqlite in this case)
