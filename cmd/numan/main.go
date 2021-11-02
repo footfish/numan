@@ -220,7 +220,16 @@ func (c *client) list(p cmdcli.RxParameters) {
 		os.Exit(1)
 	} else {
 		printNumberList(numberList)
+		if len(numberList) == 1 { //print number history if there is only one result.
+			if historyList, err := c.history.ListHistoryByNumber(c.ctx, numberList[0].E164); err != nil {
+				color.Warn.Println(err)
+				os.Exit(1)
+			} else {
+				printHistoryList(historyList)
+			}
+		}
 	}
+
 }
 
 //portout <phonenumber> <date>
