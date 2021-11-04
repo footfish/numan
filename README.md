@@ -205,7 +205,8 @@ See section on running client-server above for more detials.
         /num      # command line client 
     /internal 
         /service        # core service applications 
-                /datastore    # db storage layer (sqlite in this case)
+                /auth    # service authentication/user role layer
+                /datastore    # service db storage layer (using sqlite)
         /cmdcli     # simple cli helper lib 
      /scripts       # external scripts 
     /api
