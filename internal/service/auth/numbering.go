@@ -21,7 +21,7 @@ func NewNumberingService(store *datastore.Store) numan.NumberingService {
 
 // Add implements NumberingService.Add()
 func (s *numberingService) Add(ctx context.Context, number *numan.Numbering) error {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return err
 	}
 	return s.next.Add(ctx, number) //storage
@@ -33,7 +33,7 @@ func (s *numberingService) AddGroup(ctx context.Context) {
 
 //List implements NumberingService.List()
 func (s *numberingService) List(ctx context.Context, filter *numan.NumberFilter) ([]numan.Numbering, error) {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return []numan.Numbering{}, err
 	}
 	return s.next.List(ctx, filter)
@@ -41,7 +41,7 @@ func (s *numberingService) List(ctx context.Context, filter *numan.NumberFilter)
 
 //ListOwnerID implements NumberingService.ListOwnerID()
 func (s *numberingService) ListOwnerID(ctx context.Context, oid int64) ([]numan.Numbering, error) {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return []numan.Numbering{}, err
 	}
 	return s.next.ListOwnerID(ctx, oid)
@@ -49,7 +49,7 @@ func (s *numberingService) ListOwnerID(ctx context.Context, oid int64) ([]numan.
 
 //Summary implements NumberingService.Summary()
 func (s *numberingService) Summary(ctx context.Context) (string, error) {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return err.Error(), err
 	}
 	return s.next.Summary(ctx)
@@ -57,7 +57,7 @@ func (s *numberingService) Summary(ctx context.Context) (string, error) {
 
 //Delete implements NumberingService.Delete()
 func (s *numberingService) Delete(ctx context.Context, phonenumber *numan.E164) error {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return err
 	}
 	return s.next.Delete(ctx, phonenumber)
@@ -65,7 +65,7 @@ func (s *numberingService) Delete(ctx context.Context, phonenumber *numan.E164) 
 
 //View implements NumberingService.View()
 func (s *numberingService) View(ctx context.Context, number *numan.E164) (string, error) {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return err.Error(), err
 	}
 	return s.next.View(ctx, number)
@@ -73,7 +73,7 @@ func (s *numberingService) View(ctx context.Context, number *numan.E164) (string
 
 //Reserve implements NumberingService.Reserve()
 func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, ownerID *int64, untilTS *int64) error {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return err
 	}
 	return s.next.Reserve(ctx, number, ownerID, untilTS)
@@ -81,7 +81,7 @@ func (s *numberingService) Reserve(ctx context.Context, number *numan.E164, owne
 
 //Allocate implements NumberingService.Allocate()
 func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, ownerID *int64) error {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return err
 	}
 	return s.next.Allocate(ctx, number, ownerID)
@@ -89,7 +89,7 @@ func (s *numberingService) Allocate(ctx context.Context, number *numan.E164, own
 
 //DeAllocate implements NumberingService.DeAllocate()
 func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164, ownerID *int64) error {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return err
 	}
 	return s.next.DeAllocate(ctx, number, ownerID)
@@ -97,7 +97,7 @@ func (s *numberingService) DeAllocate(ctx context.Context, number *numan.E164, o
 
 //Portout implements NumberingService.Portout()
 func (s *numberingService) Portout(ctx context.Context, number *numan.E164, PortoutTS *int64) error {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return err
 	}
 	return s.next.Portout(ctx, number, PortoutTS)
@@ -105,7 +105,7 @@ func (s *numberingService) Portout(ctx context.Context, number *numan.E164, Port
 
 //Portin implements NumberingService.Portin()
 func (s *numberingService) Portin(ctx context.Context, number *numan.E164, PortinTS *int64) error {
-	if err := compareUserRole(numan.RoleUser, ctx); err != nil {
+	if err := checkUserRole(numan.RoleUser, ctx); err != nil {
 		return err
 	}
 	return s.next.Portin(ctx, number, PortinTS)
