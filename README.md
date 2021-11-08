@@ -118,9 +118,6 @@ Supported Commands:-
         list_free <phonenumber> [domain] 
                 Lists available numbers in db entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted
 
-        view <phonenumber>
-                Views all details and history for number entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted
-
         reserve <phonenumber> <oid> <minutes>
                 Reserves a number for an owner for a number of minutes
 
@@ -130,17 +127,11 @@ Supported Commands:-
         deallocate <phonenumber>
                 De-allocates a number from an owner
 
-        history <phonenumber>
-                Lists history log for a number
-
-        history_owner <oid>
-                Lists history log for an owner
-
         list <phonenumber> [domain] 
                 Lists number db entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted
 
-        list_owner <oid>
-                  Lists numbers attached to owner
+        owner <oid>
+                  Lists numbers attached to owner & any history
 
         delete <phonenumber>
                 Deletes a number permentantly (history retained)

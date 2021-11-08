@@ -117,7 +117,7 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmd.NewStringParameter("domain", true)
 	cmd.NewStringParameter("carrier", true)
 
-	cmdDescription = "Lists number db entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted "
+	cmdDescription = "Lists numbers matching a search. Number format is cc-ndc-sn, partial numbers are accepted. History is shown for single results."
 	cmd = cli.NewCommand("list", c.list, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^([1-9]\d{0,2}\-[01]\d{0,4}\-\d{0,13})|([1-9]\d{0,2}\-[01]\d{0,4})$`)
 	cmd.NewStringParameter("domain", false)
@@ -127,13 +127,9 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^([1-9]\d{0,2}\-[01]\d{0,4}\-\d{0,13})|([1-9]\d{0,2}\-[01]\d{0,4})$`)
 	cmd.NewStringParameter("domain", false)
 
-	cmdDescription = "Lists numbers attached to owner"
-	cmd = cli.NewCommand("list_owner", c.listOwner, cmdDescription)
+	cmdDescription = "Lists numbers attached to owner & any history"
+	cmd = cli.NewCommand("owner", c.listOwner, cmdDescription)
 	cmd.NewIntParameter("oid", true)
-
-	cmdDescription = "Views all details and history for number entries matching a number search. Number format is cc-ndc-sn, partial numbers are accepted  "
-	cmd = cli.NewCommand("view", c.view, cmdDescription)
-	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{0,4}\-\d{1,13}$`)
 
 	cmdDescription = "Deletes a number permentantly (history retained)"
 	cmd = cli.NewCommand("delete", c.delete, cmdDescription)
@@ -168,13 +164,6 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmdDescription = "Provides a summary of number database"
 	cmd = cli.NewCommand("summary", c.summary, cmdDescription)
 
-	cmdDescription = "Lists history log for an owner"
-	cmd = cli.NewCommand("history_owner", c.listHistoryOwner, cmdDescription)
-	cmd.NewIntParameter("oid", true)
-
-	cmdDescription = "Lists history log for a number"
-	cmd = cli.NewCommand("history", c.listHistoryNumber, cmdDescription)
-	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 	return cli
 }
 
@@ -220,11 +209,17 @@ func (c *client) list(p cmdcli.RxParameters) {
 		os.Exit(1)
 	} else {
 		printNumberList(numberList)
+		if len(numberList) == 0 {
+			color.Warn.Println("No numbers found")
+		}
 		if len(numberList) == 1 { //print number history if there is only one result.
 			if historyList, err := c.history.ListHistoryByNumber(c.ctx, numberList[0].E164); err != nil {
 				color.Warn.Println(err)
 				os.Exit(1)
 			} else {
+				if len(historyList) == 0 {
+					color.Warn.Println("No history found for number")
+				}
 				printHistoryList(historyList)
 			}
 		}
@@ -297,22 +292,6 @@ func (c *client) listFree(p cmdcli.RxParameters) {
 		os.Exit(1)
 	} else {
 		printNumberList(numberList)
-	}
-}
-
-//view <phonenumber>
-func (c *client) view(p cmdcli.RxParameters) {
-	splitNumber := strings.Split(p["phonenumber"].(string), "-")
-	number := numan.E164{
-		Cc:  splitNumber[0],
-		Ndc: splitNumber[1],
-		Sn:  splitNumber[2]}
-
-	if numberDetails, err := c.numbering.View(c.ctx, &number); err != nil {
-		color.Warn.Println(err)
-		os.Exit(1)
-	} else {
-		color.White.Print(numberDetails)
 	}
 }
 
@@ -420,7 +399,22 @@ func (c *client) listOwner(p cmdcli.RxParameters) {
 		color.Warn.Println(err)
 		os.Exit(1)
 	} else {
-		printNumberList(numberList)
+		if len(numberList) == 0 {
+			color.Warn.Printf("No numbers attached to ownerID %d\n", ownerID)
+		} else {
+			printNumberList(numberList)
+		}
+	}
+
+	if historyList, err := c.history.ListHistoryByOwnerID(c.ctx, ownerID); err != nil {
+		color.Warn.Println(err)
+		os.Exit(1)
+	} else {
+		if len(historyList) == 0 {
+			color.Warn.Printf("No history for ownerID %d\n", ownerID)
+		} else {
+			printHistoryList(historyList)
+		}
 	}
 }
 
@@ -470,34 +464,6 @@ func printNumberList(numberList []numan.Numbering) {
 		})
 	}
 	printer.Print(table)
-}
-
-//	history_owner <oid>
-func (c *client) listHistoryOwner(p cmdcli.RxParameters) {
-	ownerID := p["oid"].(int64)
-
-	if historyList, err := c.history.ListHistoryByOwnerID(c.ctx, ownerID); err != nil {
-		color.Warn.Println(err)
-		os.Exit(1)
-	} else {
-		printHistoryList(historyList)
-	}
-}
-
-//	history <phonenumber>
-func (c *client) listHistoryNumber(p cmdcli.RxParameters) {
-	splitNumber := strings.Split(p["phonenumber"].(string), "-")
-	number := numan.E164{
-		Cc:  splitNumber[0],
-		Ndc: splitNumber[1],
-		Sn:  splitNumber[2]}
-
-	if historyList, err := c.history.ListHistoryByNumber(c.ctx, number); err != nil {
-		color.Warn.Println(err)
-		os.Exit(1)
-	} else {
-		printHistoryList(historyList)
-	}
 }
 
 //printHistoryList prints slice of numan.History as a table
