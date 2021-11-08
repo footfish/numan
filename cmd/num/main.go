@@ -244,7 +244,7 @@ func (c *client) portout(p cmdcli.RxParameters) {
 		color.Warn.Println(err)
 		os.Exit(1)
 	} else {
-		color.White.Print("Port date set")
+		color.Info.Print("Port date set")
 	}
 }
 
@@ -261,7 +261,7 @@ func (c *client) portin(p cmdcli.RxParameters) {
 		color.Warn.Println(err)
 		os.Exit(1)
 	} else {
-		color.White.Print("Port date set")
+		color.Info.Print("Port date set")
 	}
 }
 

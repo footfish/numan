@@ -184,6 +184,11 @@ See section on running client-server above for more detials.
 - sanity check/verification of user/pass 
 - add/remove call for users 
 - add/remove users command 
+- portin/portout oid required
+- porting notifications
+- porting log entry (at time of port) 
+- portout automatic de-allocation (with notifications)
+- optional override date for command 'add' and 'allocate' 
 
 ## Project folder structure 
 ```
