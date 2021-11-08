@@ -178,11 +178,8 @@ See section on running client-server above for more detials.
 
 
 ## TODO
-- command view for single number with history
-- extend auth to all methods
 - improve error handling 
 - expand tests 
-- add command user roles 
 - memory store for user auth
 - sanity check/verification of user/pass 
 - add/remove call for users 

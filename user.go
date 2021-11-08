@@ -18,6 +18,7 @@ const (
 	//tokenDuration  = 1 * time.Minute //TODO testing
 	AuthTokenField = "token" //field name to use in ctx and meta data for storing auth token
 	RoleUser       = "user"
+	RoleAdmin      = "admin"
 )
 
 type User struct {
