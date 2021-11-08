@@ -2,7 +2,9 @@ package grpc
 
 import (
 	context "context"
+	"errors"
 	"fmt"
+	"log"
 
 	"github.com/footfish/numan"
 	grpc "google.golang.org/grpc"
@@ -16,13 +18,16 @@ func NewGrpcServer(creds credentials.TransportCredentials) *grpc.Server {
 }
 
 // NewGrpcClient creates a new grpc client connection
-func NewGrpcClient(address string, creds credentials.TransportCredentials) *grpc.ClientConn {
+func NewGrpcClient(ctx context.Context, address string, creds credentials.TransportCredentials) *grpc.ClientConn {
 	// Set up a connection to the server.
-	//conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds),
-		grpc.WithUnaryInterceptor(authClientInterceptor))
+	conn, err := grpc.DialContext(ctx, address, grpc.WithTransportCredentials(creds),
+		grpc.WithUnaryInterceptor(authClientInterceptor), grpc.WithBlock())
 	if err != nil {
-		panic(err)
+		if errors.Is(err, context.DeadlineExceeded) {
+			log.Fatalf("gRPC connect timeout (check server is running)")
+		}
+		log.Fatalf("gRPC connect error: %s", err)
+
 	}
 	return conn
 }

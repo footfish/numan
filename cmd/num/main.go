@@ -41,13 +41,20 @@ var conf struct {
 }
 
 func main() {
+	var c client
+
 	//Init conf from environmental vars
 	godotenv.Load("num.env")
 	if err := envconfig.Init(&conf); err != nil {
 		log.Fatalf("Failed to load required environmental variables for config: %v", err)
 	}
 
-	var c client
+	//Init context
+	var cancel context.CancelFunc
+	c.ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second) //add client context
+	defer cancel()
+
+	//Init services
 	if conf.ServerAddress == "" { //standalone servicelication with local db connection
 		store := datastore.NewStore(conf.Dsn)
 		defer store.Close()
@@ -65,23 +72,20 @@ func main() {
 				log.Fatalf("cert load error: %s", err)
 			}
 		}
-		grpcClient := grpc.NewGrpcClient(conf.ServerAddress, creds)
+		grpcClient := grpc.NewGrpcClient(c.ctx, conf.ServerAddress, creds)
 		c.numbering = grpc.NewNumberingClientAdapter(grpcClient)
 		c.history = grpc.NewHistoryClientAdapter(grpcClient)
 		c.user = grpc.NewUserClientAdapter(grpcClient)
 	}
 
-	var cancel context.CancelFunc
-	c.ctx, cancel = context.WithTimeout(context.Background(), time.Second) //add client context
-	defer cancel()
-
-	//Get authentication token in context
-	//store token in context.
-	if err := c.setAuthToken(); err != nil {
+	//Init authentication
+	if err := c.setAuthToken(); err != nil { //load auth token from cached file or refresh
 		color.Error.Println("Authentication error -", err)
 		os.Exit(1)
 	}
 	c.ctx = context.WithValue(c.ctx, "token", c.auth.AccessToken) //add auth token to context
+
+	//Run command line application
 	c.initCli().Run()
 }
 
