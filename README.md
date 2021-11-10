@@ -189,6 +189,9 @@ See section on running client-server above for more detials.
 - porting log entry (at time of port) 
 - portout automatic de-allocation (with notifications)
 - optional override date for command 'add' and 'allocate' 
+- flag numbers out of commission
+- return random list for list_free 
+- design for tab completion (command naming)
 
 ## Project folder structure 
 ```
