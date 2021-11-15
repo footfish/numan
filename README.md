@@ -9,7 +9,7 @@ General Usage:-
                 Syntax: <mandatory> , [optional] 
 
 Example:-
-        num view 353-01-12345111    # view details for phone number 353-01-12345111
+        num list 353-01-12345111    # view details for phone number 353-01-12345111
 ```
 It's a personal (learning) project (to replace an excel file). The main purpose is to:
 - explore suitable Go project layout. 
@@ -71,7 +71,7 @@ General Usage:-
 # Sample usage (see /scripts folder for more examples)
 $ num summary                 # prints a summary of the example database 
 $ num list 353-01             # prints details of numbers starting 353-01
-$ num view 353-01-12345111    # view all details for number 353-01-12345111
+
 
 ```
 ### Running Client-Server Mode
@@ -99,7 +99,7 @@ General Usage:-
 # Sample usage (see /scripts folder for more examples)
 $ num summary                 # prints a summary of the example database 
 $ num list 353-01             # prints details of numbers starting 353-01
-$ num view 353-01-12345111    # view all details for numer 353-01-12345111
+
 ```
 
 ## Usage 
