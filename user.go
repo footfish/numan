@@ -2,10 +2,13 @@ package numan
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //add a user
@@ -16,25 +19,27 @@ const (
 	secretKey     = "secret"
 	tokenDuration = 15 * time.Minute
 	//tokenDuration  = 1 * time.Minute //TODO testing
-	AuthTokenField = "token" //field name to use in ctx and meta data for storing auth token
-	RoleUser       = "user"
-	RoleAdmin      = "admin"
+	AuthTokenField     = "token" //field name to use in ctx and meta data for storing auth token
+	RoleUser           = "user"
+	RoleAdmin          = "admin"
+	PatternUser        = "^[1-9a-z]{3,13}$"
+	PatternRawPassword = "^[1-9a-zA-Z._%-]{5,13}$"
 )
 
 type User struct {
-	UID          int64
-	Username     string
-	PasswordHash string
-	Role         string
-	AccessToken  string
+	UID         int64
+	Username    string
+	Password    string //can be hashed or raw
+	Role        string
+	AccessToken string
 }
 
 //UserService exposes interface for managing users
 type UserService interface {
-	//AuthUser authenticates a user and returns a copy of user data with JWT token
+	//Auth authenticates a user and returns a copy of user data with JWT token
 	Auth(ctx context.Context, Username string, Password string) (user User, err error)
 	//AddUser adds a new user
-	//AddUser(ctx context.Context, user User)
+	AddUser(ctx context.Context, user User) error
 }
 
 //userClaims is JWT claims object
@@ -108,4 +113,43 @@ func (u *User) AuthRefreshRequired() bool {
 		return true
 	}
 	return false
+}
+
+//ValidUsername checks if the format of User.Username is valid
+func (u *User) ValidUsername() bool {
+	res, _ := regexp.MatchString(PatternUser, u.Username)
+	return res
+}
+
+//ValidPasssword checks if User.Password is valid RAW password
+func (u *User) ValidRawPassword() bool {
+	res, _ := regexp.MatchString(PatternRawPassword, u.Password)
+	return res
+}
+
+//PasswordIsHashed checks if User.Password is hashed
+func (u *User) PasswordIsHashed() bool {
+	if _, err := bcrypt.Cost([]byte(u.Password)); err != nil {
+		return false
+	}
+	return true
+}
+
+//HashPassword will hash User.Password
+func (u *User) HashPassword() error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	if err == nil {
+		u.Password = string(hashedPassword)
+	}
+	return err
+}
+
+func (u *User) ComparePassword(password string) error {
+	if u.PasswordIsHashed() {
+		return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	}
+	if !(u.Password == password) {
+		return errors.New("password mismatch")
+	}
+	return nil
 }

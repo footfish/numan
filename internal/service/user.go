@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/footfish/numan"
+	"github.com/footfish/numan/internal/service/auth"
 	"github.com/footfish/numan/internal/service/datastore"
-	"golang.org/x/crypto/bcrypt"
 )
 
 //userService implements the UserService interface
@@ -18,32 +19,52 @@ type userService struct {
 // NewUserService instantiates a new UserService.
 func NewUserService(store *datastore.Store) numan.UserService {
 	return &userService{
-		next: datastore.NewUserService(store),
+		next: auth.NewUserService(store),
 	}
 }
 
 //Auth implements UserService.Auth()
-func (s *userService) Auth(ctx context.Context, username string, password string) (user numan.User, err error) {
-	//TODO better sanity check user/pass
-	if len(password) < 8 && len(password) > 32 {
-		return user, errors.New("Bad password format")
+func (s *userService) Auth(ctx context.Context, username string, password string) (numan.User, error) {
+	//sanity checks
+	enteredUser := numan.User{Username: strings.ToLower(username), Password: strings.ToLower(password)}
+	if !enteredUser.ValidRawPassword() {
+		return enteredUser, errors.New("Invalid password")
 	}
-	password = strings.ToLower(password)
-	username = strings.ToLower(username)
-
-	if user, err = s.next.Auth(ctx, username, password); err == nil {
-		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if !enteredUser.ValidUsername() {
+		return enteredUser, errors.New("Invalid Username")
+	}
+	//Fetch User from store (password ignored)
+	storedUser, err := s.next.Auth(ctx, enteredUser.Username, enteredUser.Password)
+	//Authenticate
+	if err == nil {
+		err = storedUser.ComparePassword(enteredUser.Password)
 		if err != nil {
-			return user, errors.New("Username/password mismatch")
+			return enteredUser, errors.New("Username/password mismatch")
 		}
-		user.SetNewAccessToken()
+		storedUser.SetNewAccessToken()
 	}
-	return
+	//Note: if public login should be obfiscating error here
+	return storedUser, err
 }
 
-/*
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return userdata, fmt.Errorf("cannot hash password: %w", err)
+//AddUser implements UserService.AddUser()
+func (s *userService) AddUser(ctx context.Context, user numan.User) (err error) {
+	//sanity checks
+	if !(user.Role == numan.RoleAdmin || user.Role == numan.RoleUser) {
+		return errors.New("incompatible role")
 	}
-*/
+	if !user.ValidUsername() {
+		return errors.New("bad username")
+	}
+	//Hash password if needed
+	if !user.PasswordIsHashed() {
+		if !user.ValidRawPassword() {
+			return errors.New("bad password")
+		}
+		if err = user.HashPassword(); err != nil {
+			return fmt.Errorf("can't hash password: %w", err)
+		}
+	}
+	//store
+	return s.next.AddUser(ctx, user)
+}

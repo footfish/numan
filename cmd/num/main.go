@@ -27,15 +27,16 @@ type client struct {
 	numbering numan.NumberingService
 	history   numan.HistoryService
 	user      numan.UserService
-	ctx       context.Context //TODO move out of struct
-	auth      numan.User      //TODO do I need this now I have user.
+	ctx       context.Context //ctx ok here in structs as no scope issues. https://go.dev/blog/context-and-structs
+
+	auth numan.User
 }
 
 var conf struct {
 	Dsn           string
 	ServerAddress string `envconfig:"optional"` //if ommitted works in standalone mode
 	TlsCert       string `envconfig:"optional"` //if ommitted trusted Certificate Authority is needed
-	TokenFile     string `envconfig:"default=.numan_auth"`
+	TokenFile     string `envconfig:"default=.num_auth"`
 	User          string
 	Password      string
 }
@@ -372,7 +373,7 @@ func (c *client) allocate(p cmdcli.RxParameters) {
 	}
 }
 
-//deallocate <phonenumber>
+//deallocate <phonenumber> <oid>
 func (c *client) deallocate(p cmdcli.RxParameters) {
 	splitNumber := strings.Split(p["phonenumber"].(string), "-")
 	number := numan.E164{

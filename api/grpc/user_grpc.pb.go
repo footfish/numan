@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 type UserClient interface {
 	//Auth authenticates a user/pass and returns a token.
 	Auth(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error)
+	//Add adds a new user
+	AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*AddUserResponse, error)
 }
 
 type userClient struct {
@@ -39,12 +41,23 @@ func (c *userClient) Auth(ctx context.Context, in *AuthRequest, opts ...grpc.Cal
 	return out, nil
 }
 
+func (c *userClient) AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*AddUserResponse, error) {
+	out := new(AddUserResponse)
+	err := c.cc.Invoke(ctx, "/grpc.User/AddUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility
 type UserServer interface {
 	//Auth authenticates a user/pass and returns a token.
 	Auth(context.Context, *AuthRequest) (*AuthResponse, error)
+	//Add adds a new user
+	AddUser(context.Context, *AddUserRequest) (*AddUserResponse, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -54,6 +67,9 @@ type UnimplementedUserServer struct {
 
 func (UnimplementedUserServer) Auth(context.Context, *AuthRequest) (*AuthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Auth not implemented")
+}
+func (UnimplementedUserServer) AddUser(context.Context, *AddUserRequest) (*AddUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUser not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -86,6 +102,24 @@ func _User_Auth_Handler(srv interface{}, ctx context.Context, dec func(interface
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_AddUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).AddUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc.User/AddUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).AddUser(ctx, req.(*AddUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,6 +130,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Auth",
 			Handler:    _User_Auth_Handler,
+		},
+		{
+			MethodName: "AddUser",
+			Handler:    _User_AddUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

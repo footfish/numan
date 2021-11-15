@@ -42,9 +42,10 @@ $ cd numan
 $ go install ./cmd/...
  
 ```
-Two binaries are installed 
+Three binaries are installed 
 *  num (client or standalone)
 *  numd (server)
+*  numa (adminisration client)
 
 ## Configuration 
 Configuration is from environmental variables. 
@@ -177,13 +178,11 @@ See section on running client-server above for more detials.
 - single owner per number 
 
 
-## TODO
+## TODO / Wish list
 - improve error handling 
 - expand tests 
 - memory store for user auth
-- sanity check/verification of user/pass 
-- add/remove call for users 
-- add/remove users command 
+- implement admin commands (numa)  delete, list, password
 - portin/portout oid required
 - porting notifications
 - porting log entry (at time of port) 
@@ -199,6 +198,7 @@ See section on running client-server above for more detials.
     /cmd
         /numd     # server 
         /num      # command line client 
+        /numa     # admin command line client 
     /internal 
         /service        # core service applications 
                 /auth    # service authentication/user role layer

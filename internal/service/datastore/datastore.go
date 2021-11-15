@@ -43,7 +43,7 @@ func NewStore(dsn string) *Store {
 	if _, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS user (
 			id INTEGER PRIMARY KEY,
-			username TEXT NOT NULL,
+			username TEXT NOT NULL UNIQUE,
 			passwordhash TEXT NOT NULL,
 			role TEXT NOT NULL
 		);
