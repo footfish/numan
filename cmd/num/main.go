@@ -136,7 +136,7 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 	cmd = cli.NewCommand("owner", c.listOwner, cmdDescription)
 	cmd.NewIntParameter("oid", true)
 
-	cmdDescription = "Deletes a number permentantly (history retained)"
+	cmdDescription = "Deletes a number permanently (history retained)"
 	cmd = cli.NewCommand("delete", c.delete, cmdDescription)
 	cmd.NewStringParameter("phonenumber", true).SetRegexp(`^[1-9]\d{0,2}\-[01]\d{1,4}\-\d{5,13}$`)
 

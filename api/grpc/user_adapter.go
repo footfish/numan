@@ -39,6 +39,24 @@ func (c *userClientAdapter) AddUser(ctx context.Context, user numan.User) (err e
 	return err
 }
 
+//DeleteUser  implements UserService.DeleteUser
+func (c *userClientAdapter) DeleteUser(ctx context.Context, username string) (err error) {
+	_, err = c.grpc.DeleteUser(ctx, &DeleteUserRequest{Username: username})
+	return err
+}
+
+//ListUsers  implements UserService.ListUsers
+func (c *userClientAdapter) ListUsers(ctx context.Context, userfilter string) (userlist []numan.User, err error) {
+	listUsersRequest := ListUsersRequest{Userfilter: userfilter}
+	listUsersResponse, err := c.grpc.ListUsers(ctx, &listUsersRequest)
+	if err == nil {
+		for _, user := range listUsersResponse.Userlist {
+			userlist = append(userlist, numan.User{Username: user.Username, Role: user.Role})
+		}
+	}
+	return
+}
+
 //userServerAdapter implements an Adapter from UserServer(grpc) to UserService.
 type userServerAdapter struct {
 	service numan.UserService
@@ -59,4 +77,24 @@ func (s *userServerAdapter) Auth(ctx context.Context, auth *AuthRequest) (resp *
 //AddUser implements UserServer.AddUser()
 func (s *userServerAdapter) AddUser(ctx context.Context, in *AddUserRequest) (resp *AddUserResponse, err error) {
 	return &AddUserResponse{}, s.service.AddUser(ctx, numan.User{Username: in.Username, Password: in.Password, Role: in.Role})
+}
+
+//ListsUsers implements UserServer.ListsUsers()
+func (s *userServerAdapter) ListUsers(ctx context.Context, in *ListUsersRequest) (*ListUsersResponse, error) {
+	userList, err := s.service.ListUsers(ctx, in.Userfilter)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ListUsersResponse
+	for _, userEntry := range userList {
+		resp.Userlist = append(resp.Userlist, &UserEntry{Username: userEntry.Username, Role: userEntry.Role})
+	}
+
+	return &resp, err
+}
+
+//DeleteUser implements UserServer.DeleteUser()
+func (s *userServerAdapter) DeleteUser(ctx context.Context, in *DeleteUserRequest) (resp *DeleteUserResponse, err error) {
+	return &DeleteUserResponse{}, s.service.DeleteUser(ctx, in.Username)
 }

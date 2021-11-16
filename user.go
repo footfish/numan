@@ -40,6 +40,10 @@ type UserService interface {
 	Auth(ctx context.Context, Username string, Password string) (user User, err error)
 	//AddUser adds a new user
 	AddUser(ctx context.Context, user User) error
+	//DeleteUser removes a new user
+	DeleteUser(ctx context.Context, username string) error
+	//ListUsers returns an array of matching users.
+	ListUsers(ctx context.Context, userfilter string) ([]User, error)
 }
 
 //userClaims is JWT claims object

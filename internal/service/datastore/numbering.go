@@ -150,7 +150,7 @@ func (s *numberingService) Delete(ctx context.Context, phonenumber *numan.E164) 
 		return err
 	}
 	if n, _ := row.RowsAffected(); n == 0 { //ok for sqlite. RowsAffected may not be supported with other drivers.
-		return errors.New("Unable to delete, check the number")
+		return errors.New("Unable to delete, check the number exists")
 	}
 	return nil
 }

@@ -6,30 +6,54 @@ option go_package = "https://github.com/footfish/numan/api/grpc";
 service User {
     //Auth authenticates a user/pass and returns a token.
     rpc Auth (AuthRequest) returns (AuthResponse) {}
-    //Add adds a new user
+    //AddUser adds a new user
     rpc AddUser (AddUserRequest) returns (AddUserResponse) {}
+    //ListsUsers lists users
+    rpc ListUsers (ListUsersRequest) returns (ListUsersResponse) {}
+    //DeleteUser deletes a user
+    rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse) {}
 }
 
 message AuthRequest {
     string username = 1;
     string password = 2;
-   }
+}
  
-  message AuthResponse {
+message AuthResponse {
     int64 uid = 1;
     string username = 2;
     string passwordhash = 3; 
     string role = 4;
     string token = 5;
-   }
+}
  
-   message AddUserRequest {
+message AddUserRequest {
     string username = 1;
     string password = 2; 
     string role = 3;
-    }
+}
  
-   message AddUserResponse {
-   }
+message AddUserResponse {
+}
  
+message ListUsersRequest {
+    string userfilter = 1;
+}
+
+message ListUsersResponse {
+    repeated UserEntry userlist = 1;
+}
+
+message UserEntry {
+    string username = 1;
+    string role = 2;
+}
+
+message DeleteUserRequest {
+    string username = 1;
+}
+   
+message DeleteUserResponse {
+}
+
  

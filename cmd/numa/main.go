@@ -16,6 +16,7 @@ import (
 	"github.com/footfish/numan/internal/service/datastore"
 	"github.com/gookit/color"
 	"github.com/joho/godotenv"
+	"github.com/lensesio/tableprinter"
 	"github.com/vrischmann/envconfig"
 	"google.golang.org/grpc/credentials"
 )
@@ -108,31 +109,31 @@ func (c *client) initCli() cmdcli.CommandConfigs {
 
 	cmdDescription := "Adds a new user to the database."
 	cmd := cli.NewCommand("add", c.add, cmdDescription)
-	cmd.NewStringParameter("user", true).SetRegexp(numan.PatternUser) //mandatory params first.
+	cmd.NewStringParameter("username", true).SetRegexp(numan.PatternUser) //mandatory params first.
 	cmd.NewStringParameter("password", true).SetRegexp(numan.PatternRawPassword)
 	cmd.NewStringParameter("role", true).SetRegexp(`^(` + numan.RoleAdmin + `)|(` + numan.RoleUser + `)$`)
 
-	cmdDescription = "Lists users. Will search partial usernames."
+	cmdDescription = "Lists users. Will search partial usernames or list all."
 	cmd = cli.NewCommand("list", c.list, cmdDescription)
-	cmd.NewStringParameter("user", false)
+	cmd.NewStringParameter("username", false)
 
 	cmdDescription = "Delete a user"
 	cmd = cli.NewCommand("delete", c.delete, cmdDescription)
-	cmd.NewStringParameter("user", true).SetRegexp(`^[1-9a-z]{5,13}$`) //mandatory params first.
+	cmd.NewStringParameter("username", true).SetRegexp(numan.PatternUser) //mandatory params first.
 
 	cmdDescription = "Sets a users password"
 	cmd = cli.NewCommand("password", c.password, cmdDescription)
-	cmd.NewStringParameter("user", true).SetRegexp(`^[1-9a-z]{5,13}$`) //mandatory params first.
-	cmd.NewStringParameter("password", true).SetRegexp(`^[1-9a-zA-Z._%-]{5,13}$`)
+	cmd.NewStringParameter("username", true).SetRegexp(numan.PatternUser) //mandatory params first.
+	cmd.NewStringParameter("password", true).SetRegexp(numan.PatternRawPassword)
 
 	return cli
 }
 
-//add <user> <password> <role>
+//add <username> <password> <role>
 func (c *client) add(p cmdcli.RxParameters) {
 
 	newUser := numan.User{
-		Username: p["user"].(string),
+		Username: p["username"].(string),
 		Role:     p["role"].(string),
 		Password: p["password"].(string),
 	}
@@ -145,20 +146,62 @@ func (c *client) add(p cmdcli.RxParameters) {
 	color.Info.Println("Success, username '" + newUser.Username + "' added")
 }
 
-//list [user]
+//list [username]
 func (c *client) list(p cmdcli.RxParameters) {
-	username := p["username"].(string)
-	color.Info.Println("Success" + username)
+	username, ok := p["username"].(string)
+	if !ok {
+		username = ""
+	}
+
+	userlist, err := c.user.ListUsers(c.ctx, username)
+	if err != nil {
+		color.Warn.Println(err)
+		os.Exit(1)
+	}
+	if len(userlist) == 0 {
+		color.Warn.Println("None found")
+		os.Exit(1)
+	}
+	printUserList(userlist)
 }
 
 //delete <username>
 func (c *client) delete(p cmdcli.RxParameters) {
 	username := p["username"].(string)
-	color.Info.Println("Better confirm this deletion" + username)
+
+	if err := c.user.DeleteUser(c.ctx, username); err != nil {
+		color.Warn.Println(err)
+		os.Exit(1)
+	}
+	color.Info.Println("Deleted username '" + username + "'")
 }
 
-//password <user> <password>
+//password <username> <password>
 func (c *client) password(p cmdcli.RxParameters) {
 	username := p["username"].(string)
 	color.Info.Println("Better confirm this password change for " + username)
+}
+
+//printUserList prints slice of numan.User as a table
+func printUserList(userList []numan.User) {
+	printer := tableprinter.New(os.Stdout)
+
+	type tableRow struct {
+		Username string `header:"Username"`
+		Role     string `header:"Role"`
+	}
+	table := []tableRow{}
+
+	printer.BorderTop, printer.BorderBottom, printer.BorderLeft, printer.BorderRight = true, true, true, true
+	printer.CenterSeparator = "│"
+	printer.ColumnSeparator = "│"
+	printer.RowSeparator = "─"
+
+	for _, n := range userList {
+		table = append(table, tableRow{
+			Username: n.Username,
+			Role:     n.Role,
+		})
+	}
+	printer.Print(table)
 }

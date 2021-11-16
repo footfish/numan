@@ -68,3 +68,17 @@ func (s *userService) AddUser(ctx context.Context, user numan.User) (err error) 
 	//store
 	return s.next.AddUser(ctx, user)
 }
+
+//DeleteUser  implements UserService.DeleteUser
+func (s *userService) DeleteUser(ctx context.Context, username string) error {
+	u := numan.User{Username: username}
+	if !u.ValidUsername() {
+		return errors.New("Invalid Username")
+	}
+	return s.next.DeleteUser(ctx, username)
+}
+
+//ListUsers  implements UserService.DeleteUser
+func (s *userService) ListUsers(ctx context.Context, userfilter string) ([]numan.User, error) {
+	return s.next.ListUsers(ctx, userfilter)
+}

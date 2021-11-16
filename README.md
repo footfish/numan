@@ -182,7 +182,7 @@ See section on running client-server above for more detials.
 - improve error handling 
 - expand tests 
 - memory store for user auth
-- implement admin commands (numa)  delete, list, password
+- implement admin command 'numa password'
 - portin/portout oid required
 - porting notifications
 - porting log entry (at time of port) 
@@ -190,7 +190,9 @@ See section on running client-server above for more detials.
 - optional override date for command 'add' and 'allocate' 
 - flag numbers out of commission
 - return random list for list_free 
-- design for tab completion (command naming)
+- design for tab completion (command renaming)
+- confirmation for some commands
+- help for commands with one optional param
 
 ## Project folder structure 
 ```
