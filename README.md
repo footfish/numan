@@ -182,7 +182,6 @@ See section on running client-server above for more detials.
 - improve error handling 
 - expand tests 
 - memory store for user auth
-- implement admin command 'numa password'
 - portin/portout oid required
 - porting notifications
 - porting log entry (at time of port) 
@@ -192,7 +191,7 @@ See section on running client-server above for more detials.
 - return random list for list_free 
 - design for tab completion (command renaming)
 - confirmation for some commands
-- help for commands with one optional param
+- help for commands with one optional param (ex. numa list )
 
 ## Project folder structure 
 ```

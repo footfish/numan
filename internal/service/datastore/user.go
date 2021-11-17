@@ -74,3 +74,19 @@ func (s *userService) ListUsers(ctx context.Context, userfilter string) (userLis
 	}
 	return resultList, nil
 }
+
+//ChangePassword implements UserService.ChangePassword
+func (s *userService) SetPassword(ctx context.Context, username string, newPassword string) error {
+	u := numan.User{Password: newPassword, Username: username}
+	if err := u.HashPassword(); err != nil {
+		return err
+	}
+	row, err := s.store.db.Exec("UPDATE user SET passwordhash=? WHERE username=?", u.Password, u.Username)
+	if err != nil {
+		return err
+	}
+	if n, _ := row.RowsAffected(); n == 0 { //ok for sqlite. RowsAffected may not be supported with other drivers.
+		return errors.New("Unable to set password, check the username exists")
+	}
+	return nil
+}

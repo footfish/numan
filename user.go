@@ -44,6 +44,8 @@ type UserService interface {
 	DeleteUser(ctx context.Context, username string) error
 	//ListUsers returns an array of matching users.
 	ListUsers(ctx context.Context, userfilter string) ([]User, error)
+	//SetPassword changes a users password
+	SetPassword(ctx context.Context, username string, newPassword string) error
 }
 
 //userClaims is JWT claims object

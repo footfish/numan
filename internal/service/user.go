@@ -82,3 +82,8 @@ func (s *userService) DeleteUser(ctx context.Context, username string) error {
 func (s *userService) ListUsers(ctx context.Context, userfilter string) ([]numan.User, error) {
 	return s.next.ListUsers(ctx, userfilter)
 }
+
+//ChangePassword implements UserService.ChangePassword
+func (s *userService) SetPassword(ctx context.Context, username string, newPassword string) error {
+	return s.next.SetPassword(ctx, username, newPassword)
+}

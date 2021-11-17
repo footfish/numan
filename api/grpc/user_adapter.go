@@ -57,6 +57,12 @@ func (c *userClientAdapter) ListUsers(ctx context.Context, userfilter string) (u
 	return
 }
 
+//ChangePassword implements UserService.ChangePassword()
+func (c *userClientAdapter) SetPassword(ctx context.Context, username string, newPassword string) (err error) {
+	_, err = c.grpc.SetPassword(ctx, &SetPasswordRequest{Username: username, Password: newPassword})
+	return err
+}
+
 //userServerAdapter implements an Adapter from UserServer(grpc) to UserService.
 type userServerAdapter struct {
 	service numan.UserService
@@ -97,4 +103,9 @@ func (s *userServerAdapter) ListUsers(ctx context.Context, in *ListUsersRequest)
 //DeleteUser implements UserServer.DeleteUser()
 func (s *userServerAdapter) DeleteUser(ctx context.Context, in *DeleteUserRequest) (resp *DeleteUserResponse, err error) {
 	return &DeleteUserResponse{}, s.service.DeleteUser(ctx, in.Username)
+}
+
+//SetPassword sets a users password
+func (s *userServerAdapter) SetPassword(ctx context.Context, in *SetPasswordRequest) (resp *SetPasswordResponse, err error) {
+	return &SetPasswordResponse{}, s.service.SetPassword(ctx, in.Username, in.Password)
 }

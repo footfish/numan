@@ -24,7 +24,6 @@ package cmdcli
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"regexp"
 	"sort"
@@ -131,7 +130,7 @@ func (c CommandConfigs) command(command string) CommandConfig {
 func (c CommandConfigs) printHelp() {
 	color.Light.Println("\nGeneral Usage:-")
 	color.Info.Println("\t" + os.Args[0] + " command <param1> [param2] [..]. ")
-	color.Note.Println("\t\tSyntax: <mandatory> , [optional] ")
+	color.Note.Println("\tSyntax: <mandatory> , [optional] ")
 	color.Light.Println("\nSupported Commands:-")
 	color.Info.Print("\t")
 
@@ -149,7 +148,8 @@ func (c CommandConfigs) printHelp() {
 		color.Info.Print(k)
 		first = false
 	}
-	fmt.Println("\n ")
+	color.Note.Println("\n\tUse command without parameters for detailed help.")
+
 }
 
 //parameter is getter for parameterConfig
@@ -291,6 +291,7 @@ func (c CommandConfig) validateParameter(newParam string, requiredness bool) err
 
 //printUsage will print help and usage information for a command
 func (c CommandConfig) printUsage(commandString string) {
+	color.Light.Println("\nUsage:-")
 	printString := "\t" + commandString
 	for i := 0; i < len(c.param); i++ {
 		if c.param[i].required {
@@ -300,5 +301,5 @@ func (c CommandConfig) printUsage(commandString string) {
 		}
 	}
 	color.Info.Println(printString)
-	color.Note.Println("\t\t" + c.help + "\n")
+	color.Note.Println("\t" + c.help)
 }

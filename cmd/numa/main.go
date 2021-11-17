@@ -179,7 +179,12 @@ func (c *client) delete(p cmdcli.RxParameters) {
 //password <username> <password>
 func (c *client) password(p cmdcli.RxParameters) {
 	username := p["username"].(string)
-	color.Info.Println("Better confirm this password change for " + username)
+	password := p["password"].(string)
+	if err := c.user.SetPassword(c.ctx, username, password); err != nil {
+		color.Warn.Println(err)
+		os.Exit(1)
+	}
+	color.Info.Println("New password set for username '" + username + "'")
 }
 
 //printUserList prints slice of numan.User as a table

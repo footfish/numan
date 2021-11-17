@@ -12,6 +12,8 @@ service User {
     rpc ListUsers (ListUsersRequest) returns (ListUsersResponse) {}
     //DeleteUser deletes a user
     rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse) {}
+    //SetPassword sets a users password
+    rpc SetPassword (SetPasswordRequest) returns (SetPasswordResponse) {}
 }
 
 message AuthRequest {
@@ -54,6 +56,14 @@ message DeleteUserRequest {
 }
    
 message DeleteUserResponse {
+}
+
+message SetPasswordRequest {
+    string username = 1;
+    string password = 2;
+}
+   
+message SetPasswordResponse {
 }
 
  
